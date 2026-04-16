@@ -1,6 +1,4 @@
-Xem file hình ảnh và intro_kernel.txt
-Xem cả file .sql mà t đã sửa, nhất là cái bảng giai đoạn t mới thêm
-Hãy điều chỉnh lại có chọn lọc và sửa lại code, cấu trúc sql (nếu thay đổi)
+
 
 Sửa lại nút menu ở sidebar như sau
 1. Với role thư kí, chỉ hiện các nút xem trang sinh viên, giảng viên, phân công, giai đoạn nhưng ko hiện nút chấm điểm
