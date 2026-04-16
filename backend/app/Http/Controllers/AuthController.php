@@ -29,7 +29,10 @@ class AuthController extends Controller
         // Lấy vai trò duy nhất ưu tiên theo bảng thanhvien_hoidong
         $role = null;
         $tvhd = ThanhVienHoiDong::where('maGV', $user->maGV)->first();
-         $role = $tvhd->vaiTro;
+        $role = $tvhd->vaiTro;
+
+        if($role==null)
+            $role='gv';
 
         return response()->json([
             'token' => $token,
