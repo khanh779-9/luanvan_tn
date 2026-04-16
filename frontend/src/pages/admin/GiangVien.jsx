@@ -248,7 +248,7 @@ function GvFormModal({ editItem, onClose }) {
             <input type="text" value={form.soDienThoai} onChange={e => handleChange('soDienThoai', e.target.value)} disabled={loading}
               className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
           </div>
-          <div className="mb-4">
+          <div className="mb-4 hidden">
             <label className="block text-sm font-semibold text-slate-700 mb-1">Mật khẩu</label>
             <input type="password" value={form.password} onChange={e => handleChange('password', e.target.value)} disabled={loading}
               className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.password ? 'border-red-300' : 'border-slate-200'}`} />

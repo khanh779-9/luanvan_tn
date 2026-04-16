@@ -1,4 +1,3 @@
-
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -17,6 +16,10 @@ import GVPBPhanBien from './pages/gv/PhanBien';
 import GVHoiDong from './pages/gv/HoiDong';
 import TongQuan from './pages/admin/TongQuan';
 import { useAuth } from './context/AuthContext';
+import LoginSV from './pages/sv/LoginSV';
+import DashboardSV from './pages/sv/DashboardSV';
+import DangKyDeTaiSV from './pages/sv/DangKyDeTai';
+import KetQuaDeTaiSV from './pages/sv/KetQuaDeTai';
 
 const queryClient = new QueryClient();
 
@@ -38,6 +41,8 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        {/* Đăng nhập sinh viên */}
+        <Route path="/sv/login" element={<LoginSV />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
             <Route element={<RoleRoute allowed="thuky" />}>
@@ -55,8 +60,15 @@ function App() {
               <Route path="/gv/phanbien" element={<GVPBPhanBien />} />
               <Route path="/gv/hoidong" element={<GVHoiDong />} />
             </Route>
+
+            <Route element={<RoleRoute allowed="sv" />}>
+                <Route path="/sv/dashboard" element={<DashboardSV />} />
+                <Route path="/sv/dang-ky-detai" element={<DangKyDeTaiSV />} />
+                <Route path="/sv/ket-qua-detai" element={<KetQuaDeTaiSV />} />
+            </Route>
           </Route>
         </Route>
+
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>

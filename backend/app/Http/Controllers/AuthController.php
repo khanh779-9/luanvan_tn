@@ -1,5 +1,6 @@
 <?php
 
+
 namespace App\Http\Controllers;
 
 use App\Models\DeTai;
@@ -13,12 +14,12 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-		$request->validate([
-			'maGV' => 'required|string',
-			'password' => 'required|string',
-		]);
+        $request->validate([
+            'maGV' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
-		$user = GiangVien::where('maGV', $request->maGV)->first();
+        $user = GiangVien::where('maGV', $request->maGV)->first();
 
         if (!$user || !($request->password === $user->matKhau)) {
             return response()->json(['message' => 'Mã GV hoặc mật khẩu không đúng'], 401);
@@ -31,8 +32,8 @@ class AuthController extends Controller
         $tvhd = ThanhVienHoiDong::where('maGV', $user->maGV)->first();
         $role = $tvhd->vaiTro;
 
-        if($role==null)
-            $role='gv';
+        if ($role == null)
+            $role = 'gv';
 
         return response()->json([
             'token' => $token,
@@ -42,6 +43,35 @@ class AuthController extends Controller
                 'email' => $user->email,
                 'type' => 'giangvien',
                 'role' => $role,
+            ],
+        ]);
+    }
+
+    // Đăng nhập cho sinh viên
+    public function loginSinhVien(Request $request)
+    {
+        $request->validate([
+            'mssv' => 'required|string',
+            'password' => 'required|string',
+        ]);
+
+        $user = SinhVien::where('mssv', $request->mssv)->first();
+
+        if (!$user || !($request->password === $user->matKhau)) {
+            return response()->json(['message' => 'MSSV hoặc mật khẩu không đúng'], 401);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->mssv,
+                'name' => $user->hoTen,
+                'email' => $user->email,
+                'class' => $user->lop,
+                'type' => 'sinhvien',
+                'role' => 'sinhvien',
             ],
         ]);
     }

@@ -29,7 +29,10 @@ export default function Sidebar({ isOpen, onClose }) {
     } catch {}
   }
   let role = user?.role?.toLowerCase();
-  if (role && role !== "thuky") role = "gv";
+
+  if (role === "sinhvien") role = "sv";
+  else if (role && role !== "thuky") role = "gv";
+
   // Menu cấu hình theo role
   const menuConfig = {
     thuky: [
@@ -47,6 +50,11 @@ export default function Sidebar({ isOpen, onClose }) {
       { label: "Chấm phản biện", path: "/gv/phanbien", icon: HiOutlineClipboardDocumentCheck },
       { label: "Chấm hội đồng", path: "/gv/hoidong", icon: HiOutlineUserGroup },
     ],
+    sv:[
+      { label: "Tổng quan", path: "/sv/dashboard", icon: HiOutlineHome },
+      { label: "Đăng ký đề tài", path: "/sv/dang-ky-detai", icon: HiOutlinePencilSquare },
+      { label: "Kết quả đề tài", path: "/sv/ket-qua-detai", icon: HiOutlineChartBar },
+    ]
   };
   const roleLabels = { thuky: "Thư ký khoa", gv: "Giảng viên" };
   const menuItems = role && menuConfig[role] ? menuConfig[role] : [{ label: "Tổng quan", path: "/", icon: HiOutlineHome }];

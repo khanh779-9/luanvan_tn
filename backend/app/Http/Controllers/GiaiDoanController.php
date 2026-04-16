@@ -14,6 +14,18 @@ class GiaiDoanController extends Controller
         return response()->json($giaiDoans);
     }
 
+    // Cập nhật giai đoạn
+    public function update(Request $request, $id)
+    {
+        $giaiDoan = GiaiDoan::find($id);
+        if (!$giaiDoan) {
+            return response()->json(['message' => 'Không tìm thấy giai đoạn'], 404);
+        }
+        $data = $request->only(['mo_ta', 'loai', 'ngay_bat_dau', 'ngay_ket_thuc']);
+        $giaiDoan->update($data);
+        return response()->json(['message' => 'Cập nhật giai đoạn thành công', 'data' => $giaiDoan]);
+    }
+
     // Lấy giai đoạn hiện tại theo ngày
     public function current()
     {

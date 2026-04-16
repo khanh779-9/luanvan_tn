@@ -3,7 +3,6 @@ import { useNavigate } from "react-router";
 import { login } from "../services/authService";
 import { useAuth } from "../context/AuthContext";
 
-
 function getDefaultRoute(user) {
   if (user.type === "giangvien") {
     return "/admin/tong-quan";
@@ -124,6 +123,13 @@ export default function LoginPage() {
             {loading ? "Đang xử lý..." : "Đăng nhập"}
           </button>
         </form>
+
+        <div className="mt-6 text-center text-sm text-slate-500">
+          {/* // Chuyển trang đến trang đăng nhập sinh viên */}
+          <a href="/sv/login" className="text-blue-500 hover:underline">
+            Đăng nhập sinh viên
+          </a>
+        </div>
       </div>
     </div>
   );

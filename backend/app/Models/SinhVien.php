@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class SinhVien extends Model
+class SinhVien extends Authenticatable
 {
+     use HasApiTokens;
     protected $table = 'sinhvien';
     protected $primaryKey = 'mssv';
     public $incrementing = false;
