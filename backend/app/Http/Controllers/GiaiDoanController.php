@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\GiaiDoan;
+use Carbon\Carbon;
+use SebastianBergmann\Environment\Console;
+use App\Models\CauHinh;
 
 class GiaiDoanController extends Controller
 {
     // cột data có cấu trúc { "con_phancong":"false", "con_dangky": "false", "con_chamGK":"false", "con_chamPB":"false", "con_chamHD":"false" }
-    
+
     // Lấy danh sách tất cả giai đoạn
     public function index()
     {
@@ -35,12 +38,27 @@ class GiaiDoanController extends Controller
         return response()->json(['message' => 'Tạo giai đoạn thành công', 'data' => $giaiDoan], 201);
     }
 
-    
+
 
     // Lấy giai đoạn hiện tại theo ngày
     public function current()
     {
-        $today = date('Y-m-d');
+        // $today = date('Y-m-d');
+        $today = Carbon::today();
+        $useDateCustom = CauHinh::where('key', 'thoiGianTuyChinh')->first();
+        if ($useDateCustom && ($useDateCustom->value === true || $useDateCustom->value === 'true')) {
+            $dateCustomJson = CauHinh::where('key', 'tg_TuyChinh')->first();
+            $dateCustomJson = json_decode($dateCustomJson->value);
+            $dateCustom = Carbon::create(
+                $dateCustomJson->year,
+                $dateCustomJson->month,
+                $dateCustomJson->day
+            );
+            $today = $dateCustom;
+        }
+
+        // $this->info("Ngày hôm nay (current): " . $today);
+        
         $giaiDoan = GiaiDoan::where('ngay_bat_dau', '<=', $today)
             ->where('ngay_ket_thuc', '>=', $today)
             ->first();

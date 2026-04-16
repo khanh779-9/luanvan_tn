@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router';
+import StageStatusBanner from '../components/StageStatusBanner';
 import { HiOutlineBars3 } from 'react-icons/hi2';
 import Sidebar from '../components/Sidebar';
 
@@ -32,6 +33,7 @@ export default function MainLayout({ role }) {
         </div>
 
         <div className="p-4 md:p-8">
+          <StageStatusBanner />
           <Outlet />
         </div>
       </main>
