@@ -69,4 +69,4 @@ php artisan serve --port=8000
 
 ## Thông tin tài khoản test (V1)
 
-![Acc_Image](screenshot/image.png)
+![Acc_Image](screenshot/image_v1.png)
