@@ -45,12 +45,12 @@ export default function SinhVien() {
           onChange={e => { setSearch(e.target.value); setPage(1); }}
           className="border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none flex-1 min-w-[200px]"
         />
-        <button
+        {/* <button
           onClick={() => setShowImportModal(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
         >
           Import Excel
-        </button>
+        </button> */}
         <button
           onClick={() => { setEditItem(null); setShowFormModal(true); }}
           className="border border-slate-200 text-slate-700 hover:bg-slate-50 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
@@ -86,7 +86,7 @@ export default function SinhVien() {
               <tr>
                 <td colSpan={6} className="px-4 py-16 text-center">
                   <p className="text-slate-500 font-semibold">Chưa có sinh viên</p>
-                  <p className="text-sm text-slate-400 mt-1">Import danh sách sinh viên từ file Excel để bắt đầu.</p>
+                  {/* <p className="text-sm text-slate-400 mt-1">Import danh sách sinh viên từ file Excel để bắt đầu.</p> */}
                 </td>
               </tr>
             ) : (
