@@ -10,6 +10,6 @@ class GiaiDoan extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'mo_ta', 'loai', 'ngay_bat_dau', 'ngay_ket_thuc',
+        'mo_ta', 'loai', 'ngay_bat_dau', 'ngay_ket_thuc', 'data',
     ];
 }

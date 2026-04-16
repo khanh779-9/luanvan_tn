@@ -16,8 +16,9 @@ CREATE TABLE cau_hinh (
   updated_at TIMESTAMP NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO cau_hinh (`key`, `value`)
-VALUES ('giaiDoan', '5');
+INSERT INTO cau_hinh (`key`, `value`) VALUES 
+('thoiGianTuyChinh', 'false'),
+('tg_TuyChinh', '{"date": 23, "month": 3, "year": 2026}');
 
 -- =========================
 -- 2. GIẢNG VIÊN
@@ -344,6 +345,7 @@ CREATE TABLE giai_doan (
   id INT AUTO_INCREMENT PRIMARY KEY,
   mo_ta VARCHAR(255),
   loai ENUM('deadline','process','milestone'),
+  `data` TEXT NULL DEFAULT '{ "con_phancong":false, "con_dangky": false, "con_chamGK":false, "con_chamPB":false, "con_chamHD":false }',
   ngay_bat_dau DATE,
   ngay_ket_thuc DATE
 );

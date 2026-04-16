@@ -12,6 +12,11 @@ use Illuminate\Support\Facades\DB;
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-sv', [AuthController::class, 'loginSinhVien']);
 
+
+// API lấy/cập nhật thời gian tuỳ chỉnh (không cần đăng nhập)
+Route::get('/cauhinh/thoi-gian-tuy-chinh', [\App\Http\Controllers\CauHinhController::class, 'getThoiGianTuyChinh']);
+Route::post('/cauhinh/thoi-gian-tuy-chinh', [\App\Http\Controllers\CauHinhController::class, 'setThoiGianTuyChinh']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/me', [AuthController::class, 'me']);

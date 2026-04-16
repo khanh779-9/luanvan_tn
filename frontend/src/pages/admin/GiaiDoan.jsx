@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HiOutlineXMark, HiOutlineExclamationTriangle } from "react-icons/hi2";
 import {
@@ -8,6 +8,11 @@ import {
   deleteStage,
 } from "../../services/giaiDoanService";
 
+import {
+  getThoiGianTuyChinh,
+  setThoiGianTuyChinh,
+} from "../../services/cauHinhService";
+
 export default function AdminGiaiDoanPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -16,11 +21,31 @@ export default function AdminGiaiDoanPage() {
   // Form state cho sửa
   const [formMoTa, setFormMoTa] = useState("");
   const [formLoai, setFormLoai] = useState("");
+  const [formData, setFormData] = useState([]);
   const [formNgayBatDau, setFormNgayBatDau] = useState("");
   const [formNgayKetThuc, setFormNgayKetThuc] = useState("");
   const [formError, setFormError] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
+  const [customDate, setCustomDate] = useState("");
+  const [useCustom, setUseCustom] = useState(false);
+
+  useEffect(() => {
+    const fetchThoiGianTuyChinh = async () => {
+      const data = await getThoiGianTuyChinh();
+      setUseCustom(!!data.thoiGianTuyChinh);
+      if (data.tg_TuyChinh) {
+        const d = data.tg_TuyChinh;
+        // Chuyển object {date, month, year} thành yyyy-mm-dd
+        const mm = String(d.month).padStart(2, "0");
+        const dd = String(d.date).padStart(2, "0");
+        setCustomDate(`${d.year}-${mm}-${dd}`);
+      } else {
+        setCustomDate("");
+      }
+    };
+    fetchThoiGianTuyChinh();
+  }, []);
 
   const { data: gdData, isLoading } = useQuery({
     queryKey: ["giaidoan"],
@@ -52,6 +77,7 @@ export default function AdminGiaiDoanPage() {
     setEditItem(gd);
     setFormMoTa(gd.mo_ta || "");
     setFormLoai(gd.loai || "");
+    setFormData(JSON.parse(gd.data || "[]"));
     setFormNgayBatDau(gd.ngay_bat_dau || "");
     setFormNgayKetThuc(gd.ngay_ket_thuc || "");
     setFormError("");
@@ -82,6 +108,7 @@ export default function AdminGiaiDoanPage() {
       data: {
         mo_ta: formMoTa,
         loai: formLoai,
+        data: formData,
         ngay_bat_dau: formNgayBatDau,
         ngay_ket_thuc: formNgayKetThuc,
       },
@@ -114,6 +141,59 @@ export default function AdminGiaiDoanPage() {
         >
           Thêm giai đoạn
         </button>
+      </div>
+
+      <div className="gap-4 mb-4 border border-slate-200 rounded-lg px-4 py-3">
+        {isLoading ? (
+          <div className="flex items-center gap-2 mb-2">
+            <svg
+              className="animate-spin h-5 w-5 text-blue-500"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+            <span className="text-blue-500 text-sm">Đang tải dữ liệu...</span>
+          </div>
+        ) : (
+          <>
+            <div className="flex items-center gap-4 mb-4">
+              <p className="text-sm text-slate-500">
+                Thời gian hiện tại tuỳ chỉnh:{" "}
+              </p>
+              <input
+                type="date"
+                className="border border-slate-200 rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                value={customDate}
+                onChange={(e) => setCustomDate(e.target.value)}
+                disabled={!useCustom}
+              />
+            </div>
+            <label className="inline-flex items-center gap-2 text-sm text-slate-500">
+              <input
+                type="checkbox"
+                className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                checked={useCustom}
+                onChange={(e) => setUseCustom(e.target.checked)}
+              />
+              Cho phép dùng thời gian hiện tại tuỳ chỉnh (bỏ tick sẽ dùng thời
+              gian thực tế của hệ thống)
+            </label>
+          </>
+        )}
       </div>
 
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -207,23 +287,29 @@ export default function AdminGiaiDoanPage() {
       {showFormModal && editItem && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-xl p-6 max-w-lg w-full mx-auto shadow-xl">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Sửa giai đoạn</h3>
+            <h3 className="text-xl font-bold text-slate-900 mb-4">
+              Sửa giai đoạn
+            </h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Mô tả</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Mô tả
+                </label>
                 <input
                   type="text"
                   value={formMoTa}
-                  onChange={e => setFormMoTa(e.target.value)}
+                  onChange={(e) => setFormMoTa(e.target.value)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   placeholder="Nhập mô tả giai đoạn"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Loại</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Loại
+                </label>
                 <select
                   value={formLoai}
-                  onChange={e => setFormLoai(e.target.value)}
+                  onChange={(e) => setFormLoai(e.target.value)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                 >
                   <option value="">-- Chọn loại --</option>
@@ -234,29 +320,107 @@ export default function AdminGiaiDoanPage() {
               </div>
               <div className="flex gap-4">
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Ngày bắt đầu</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Ngày bắt đầu
+                  </label>
                   <input
                     type="date"
                     value={formNgayBatDau}
-                    onChange={e => setFormNgayBatDau(e.target.value)}
+                    onChange={(e) => setFormNgayBatDau(e.target.value)}
                     className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Ngày kết thúc</label>
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Ngày kết thúc
+                  </label>
                   <input
                     type="date"
                     value={formNgayKetThuc}
-                    onChange={e => setFormNgayKetThuc(e.target.value)}
+                    onChange={(e) => setFormNgayKetThuc(e.target.value)}
                     className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                 </div>
               </div>
-              {formError && <div className="text-red-500 text-sm mt-2">{formError}</div>}
+
+              {/* <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-slate-700 mb-1">
+                    Data
+                  </label>
+                  <textarea
+                    value={formData}
+                    onChange={(e) => setFormData(e.target.value)}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                    placeholder="Nhập dữ liệu giai đoạn"
+                    rows="4"
+                  />
+                </div>
+              </div> */}
+
+              <div className="gap-4">
+                <p className="block text-sm font-medium text-slate-700 mb-1">Chức năng cho phép:</p>
+                <label className="flex block text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                    checked={formData.con_phancong}
+                    onChange={(e) => setFormData({ ...formData, con_phancong: e.target.checked })}
+                  />
+                  Còn phân công
+                </label>
+
+                <label className="flex block text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                    checked={formData.con_dangky}
+                    onChange={(e) => setFormData({ ...formData, con_dangky: e.target.checked })}
+                  />
+                  Còn đăng ký
+                </label>
+
+                <label className="flex block text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                    checked={formData.con_chamGK}
+                    onChange={(e) => setFormData({ ...formData, con_chamGK: e.target.checked })}
+                  />
+                  Còn chấm điểm giữa kỳ
+                </label>
+
+                <label className="flex block text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                    checked={formData.con_chamPB}
+                    onChange={(e) => setFormData({ ...formData, con_chamPB: e.target.checked })}
+                  />
+                  Còn chấm điểm phản biện
+                </label>
+
+                <label className="flex block text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                    checked={formData.con_chamHD}
+                    onChange={(e) => setFormData({ ...formData, con_chamHD: e.target.checked })}
+                  />
+                  Còn chấm điểm hội đồng
+                </label>
+              </div>
+
+              {formError && (
+                <div className="text-red-500 text-sm mt-2">{formError}</div>
+              )}
             </div>
             <div className="flex justify-end gap-3 mt-8">
               <button
-                onClick={() => { setShowFormModal(false); setEditItem(null); }}
+                onClick={() => {
+                  setShowFormModal(false);
+                  setEditItem(null);
+                }}
                 className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 Hủy
@@ -266,7 +430,7 @@ export default function AdminGiaiDoanPage() {
                 disabled={updateMut.isPending}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition-colors disabled:opacity-50"
               >
-                {updateMut.isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
+                {updateMut.isPending ? "Đang lưu..." : "Lưu thay đổi"}
               </button>
             </div>
           </div>
