@@ -21,85 +21,41 @@ export default function Sidebar({ isOpen, onClose }) {
   const { user: contextUser, clearAuth } = useAuth();
 
   // Lấy user từ context hoặc localStorage
-  const getUser = () => {
-    if (contextUser && contextUser.name && contextUser.role) return contextUser;
+  let user = contextUser;
+  if (!user) {
     try {
       const userStr = localStorage.getItem("user");
-      if (!userStr) return null;
-      return typeof userStr === "string" ? JSON.parse(userStr) : userStr;
-    } catch {
-      return null;
-    }
-  };
-  const user = getUser();
-  let role = user?.role?.toLowerCase();
-
-  // Gộp tất cả các vai trò không phải thư ký (UyVien, Chủ tịch, GVHD, GVPB...) vào 'gv' để render Sidebar
-  if (role && role !== "thuky") {
-    role = "gv";
+      if (userStr) user = JSON.parse(userStr);
+    } catch {}
   }
+  let role = user?.role?.toLowerCase();
+  if (role && role !== "thuky") role = "gv";
   // Menu cấu hình theo role
   const menuConfig = {
     thuky: [
       { label: "Tổng quan", path: "/admin/tong-quan", icon: HiOutlineHome },
       { label: "Sinh viên", path: "/admin/sinhvien", icon: HiOutlineUsers },
-      {
-        label: "Giảng viên",
-        path: "/admin/giangvien",
-        icon: HiOutlineAcademicCap,
-      },
-      {
-        label: "Nhập liệu",
-        path: "/admin/nhaplieu",
-        icon: HiOutlineDocumentText,
-      },
+      { label: "Giảng viên", path: "/admin/giangvien", icon: HiOutlineAcademicCap },
+      { label: "Nhập liệu", path: "/admin/nhaplieu", icon: HiOutlineDocumentText },
       { label: "Phân công", path: "/admin/phancong", icon: HiOutlineUserGroup },
       { label: "Giai đoạn", path: "/admin/giaidoan", icon: HiOutlineCog6Tooth },
     ],
     gv: [
       { label: "Tổng quan", path: "/gv/tong-quan", icon: HiOutlineHome },
-      {
-        label: "Chấm giữa kỳ",
-        path: "/gv/giua-ky",
-        icon: HiOutlineChartBar,
-      },
-      {
-        label: "Chấm hướng dẫn",
-        path: "/gv/huongdan",
-        icon: HiOutlinePencilSquare,
-      },
-      {
-        label: "Chấm phản biện",
-        path: "/gv/phanbien",
-        icon: HiOutlineClipboardDocumentCheck,
-      },
-      {
-        label: "Chấm hội đồng",
-        path: "/gv/hoidong",
-        icon: HiOutlineUserGroup,
-      },
+      { label: "Chấm giữa kỳ", path: "/gv/giua-ky", icon: HiOutlineChartBar },
+      { label: "Chấm hướng dẫn", path: "/gv/huongdan", icon: HiOutlinePencilSquare },
+      { label: "Chấm phản biện", path: "/gv/phanbien", icon: HiOutlineClipboardDocumentCheck },
+      { label: "Chấm hội đồng", path: "/gv/hoidong", icon: HiOutlineUserGroup },
     ],
   };
-
-  const roleLabels = {
-    thuky: "Thư ký khoa",
-    gv: "Giảng viên",
-  };
-
-  const menuItems =
-    role && menuConfig[role]
-      ? menuConfig[role]
-      : [{ label: "Tổng quan", path: "/", icon: HiOutlineHome }];
-
-  const getRoleLabel = () => {
-    if (!role) return "";
-    return roleLabels[role] || "Người dùng";
-  };
+  const roleLabels = { thuky: "Thư ký khoa", gv: "Giảng viên" };
+  const menuItems = role && menuConfig[role] ? menuConfig[role] : [{ label: "Tổng quan", path: "/", icon: HiOutlineHome }];
+  const getRoleLabel = () => (role ? roleLabels[role] || "Người dùng" : "");
 
   const handleLogout = async () => {
     try {
       await logout();
-    } catch (e) {}
+    } catch {}
     clearAuth();
     navigate("/login");
   };

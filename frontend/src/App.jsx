@@ -1,10 +1,10 @@
+
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ProtectedRoute from './components/ProtectedRoute';
 import RoleRoute from './components/RoleRoute';
 import MainLayout from './layouts/MainLayout';
 import LoginPage from './pages/LoginPage';
-
 import AdminSinhVien from './pages/admin/SinhVien';
 import AdminGiangVien from './pages/admin/GiangVien';
 import AdminPhanCong from './pages/admin/PhanCong';
@@ -16,26 +16,30 @@ import GVHDHuongDan from './pages/gv/HuongDan';
 import GVPBPhanBien from './pages/gv/PhanBien';
 import GVHoiDong from './pages/gv/HoiDong';
 import TongQuan from './pages/admin/TongQuan';
+import { useAuth } from './context/AuthContext';
 
 const queryClient = new QueryClient();
 
-import { useAuth } from './context/AuthContext';
 
 function App() {
-  // Lấy user từ context, nếu không có thì lấy từ localStorage
-  let { user } = useAuth() || {};
+  // Lấy user từ context hoặc localStorage
+  const { user: contextUser } = useAuth() || {};
+  let user = contextUser;
   if (!user) {
     const saved = localStorage.getItem('user');
-    if (saved) user = JSON.parse(saved);
+    if (saved) {
+      try {
+        user = JSON.parse(saved);
+      } catch {}
+    }
   }
-  const role = user?.role;
+
   return (
     <QueryClientProvider client={queryClient}>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<MainLayout />}>
-            {/* Vùng của Thư ký */}
             <Route element={<RoleRoute allowed="thuky" />}>
               <Route path="/admin/tong-quan" element={<TongQuan />} />
               <Route path="/admin/sinhvien" element={<AdminSinhVien />} />
@@ -44,8 +48,6 @@ function App() {
               <Route path="/admin/giaidoan" element={<AdminGiaiDoanPage />} />
               <Route path="/admin/nhaplieu" element={<AdminNhapLieu />} />
             </Route>
-
-            {/* Vùng của Giảng viên (bao gồm các role gvhd, gvpb, uvyen...) */}
             <Route element={<RoleRoute allowed="gv" />}>
               <Route path="/gv/tong-quan" element={<GVTongQuan />} />
               <Route path="/gv/giua-ky" element={<GVHDGiuaKy />} />
@@ -54,7 +56,6 @@ function App() {
               <Route path="/gv/hoidong" element={<GVHoiDong />} />
             </Route>
           </Route>
-
         </Route>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="*" element={<div>404 Not Found</div>} />
