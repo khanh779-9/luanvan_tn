@@ -13,6 +13,8 @@ import {
   setThoiGianTuyChinh,
 } from "../../services/cauHinhService";
 
+import { formatDate } from "../../utils/helper";
+
 export default function AdminGiaiDoanPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
@@ -189,8 +191,7 @@ export default function AdminGiaiDoanPage() {
                 checked={useCustom}
                 onChange={(e) => setUseCustom(e.target.checked)}
               />
-              Cho phép dùng thời gian hiện tại tuỳ chỉnh (bỏ tick sẽ dùng thời
-              gian thực tế của hệ thống)
+              Dùng thời gian hiện tại tuỳ chỉnh (tắt: dùng thời gian thực tế của hệ thống)
             </label>
           </>
         )}
@@ -252,10 +253,10 @@ export default function AdminGiaiDoanPage() {
                   </td>
                   {/* <td className="px-4 py-3 text-sm text-slate-700 border-t border-slate-100">{gd.loai}</td> */}
                   <td className="px-4 py-3 text-sm text-slate-700 border-t border-slate-100">
-                    {gd.ngay_bat_dau}
+                    {formatDate(gd.ngay_bat_dau)}
                   </td>
                   <td className="px-4 py-3 text-sm text-slate-700 border-t border-slate-100">
-                    {gd.ngay_ket_thuc}
+                    {formatDate(gd.ngay_ket_thuc)}
                   </td>
                   <td className="px-4 py-3 border-t border-slate-100">
                     <div className="flex gap-3">
