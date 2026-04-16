@@ -1,0 +1,37 @@
+Xem file hình ảnh và intro_kernel.txt
+Xem cả file .sql mà t đã sửa, nhất là cái bảng giai đoạn t mới thêm
+Hãy điều chỉnh lại có chọn lọc và sửa lại code, cấu trúc sql (nếu thay đổi)
+
+Sửa lại nút menu ở sidebar như sau
+1. Với role thư kí, chỉ hiện các nút xem trang sinh viên, giảng viên, phân công, giai đoạn nhưng ko hiện nút chấm điểm
+2. Các role còn lại, chấm điểm giữa kì, chấm điểm hướng dẫn
+    Với gvpb, chấm điểm pb (sẽ ko hiện các nút khác ở menu sidebar, chỉ hiện nút có liên quan)
+
+
+Thư mục pages, bạn hãy tổ chức lại file điều
+Vd role thuky thì các file trang liên quan tới thư kí sẽ nằm tại thư mục pages\admin
+Trang dành cho gvhd thì nằm trong pages\gvhd
+Trang dành cho gvpb thì nằm trong pages\gvpb
+
+Bỏ trang cài đặt
+
+Có thể bạn sửa lại backend
+
+Các giai đoạn:
+1. Thời hạn SV đăng ký: 28/3 → 06/4/2026
+2. Gặp tuần đầu: 04/5 → 09/5/2026
+3. GVHD nộp DS đề tài: 27/5/2026
+4. GV gửi DSSV "không nhận đề tài": 27/5/2026
+5. Kiểm tra quản lý: 22/6 → 27/6/2026
+6. Báo cáo DSSV không được ra HĐ: 20/7 → 28/7/2026
+7. Nộp quyển lần 1: Thứ Hai 27/7/2026
+8. Phản biện: 29/7 → 07/8/2026
+9. Nộp quyển lần 2: Thứ Ba 11/8/2026
+10. Thời gian HĐ: 04/5 → 15/8/2026
+
+Dự kiến ngày HĐ BVLVTN:
+- Thứ Ba 18/8 và Thứ Tư 19/8/2026
+- Số lượng SV: 514
+
+
+Lưu ý, mỗi chức năng chỉ có thể hoạt động theo giai đoạn, ở trên kia là mẫu, hãy đối chiếu bảng giai đoạn trong mysql để thực thi

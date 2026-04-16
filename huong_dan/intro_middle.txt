@@ -1,0 +1,101 @@
+**1) File 1sv (`template_chamdiem_hd_1sv.docx`)**
+
+File này là mẫu dành cho 1 sinh viên, nên phần đầu chỉ có một bộ thông tin sinh viên gồm họ tên, MSSV, lớp. Bảng chấm điểm cũng chỉ có một cột điểm cho 1 sinh viên, và phần kết luận cuối cùng chỉ có 1 dòng điểm đánh giá / đề nghị bảo vệ. 
+
+Các biến xuất hiện trong file 1sv:
+
+* `${hoTenSV1}`: họ tên sinh viên
+* `${mssv1}`: mã số sinh viên
+* `${lop1}`: lớp
+* `${tenDeTai}`: tên đề tài
+* `${tenGVHD}`: họ tên giảng viên hướng dẫn
+* `${thuyetMinh_Dat}`: lựa chọn “Đạt”
+* `${thuyetMinh_KhongDat}`: lựa chọn “Không đạt”
+* `${ndDieuChinh}`: yêu cầu điều chỉnh / bổ sung
+* `${uuDiem}`: ưu điểm chính
+* `${thieuSot}`: thiếu sót chính
+* `${maxPhanTich}`: thang điểm cho “Phân tích vấn đề”
+* `${diemPhanTich1}`: điểm sinh viên 1 ở tiêu chí phân tích
+* `${maxThietKe}`: thang điểm cho “Thiết kế vấn đề”
+* `${diemThietKe1}`: điểm tiêu chí thiết kế
+* `${maxHienThuc}`: thang điểm cho “Hiện thực vấn đề”
+* `${diemHienThuc1}`: điểm tiêu chí hiện thực
+* `${maxBaoCao}`: thang điểm cho “Kiểm tra sản phẩm”
+* `${diemBaoCao1}`: điểm tiêu chí kiểm tra sản phẩm
+* `${diemTongCong1}`: tổng điểm
+* `${diemFinal1}`: điểm chấm thang 10
+* `${cauHoi}`: câu hỏi dành cho sinh viên
+* `${deNghi_Duoc}`: ô/đánh dấu “Được bảo vệ”
+* `${deNghi_Khong}`: ô/đánh dấu “Không được bảo vệ”
+* `${deNghi_BoSung}`: ô/đánh dấu “Bổ sung/hiệu chỉnh để được bảo vệ”
+
+Ngoài ra file có phần cố định như “TP. Hồ Chí Minh, ngày 05 tháng 01 năm 2025”, và chữ ký giảng viên hướng dẫn. 
+
+**2) File 2sv (`template_chamdiem_hd_2sv.docx`)**
+
+File này là mẫu dành cho nhóm 2 sinh viên. Phần đầu có bảng liệt kê 2 sinh viên theo các cột Họ tên sinh viên / MSSV / Lớp. Bảng chấm điểm có 2 cột điểm tương ứng cho từng sinh viên, và phần kết luận cuối cũng tách riêng từng sinh viên để giảng viên đánh giá từng người. 
+
+Các biến xuất hiện trong file 2sv:
+
+* `${hoTenSV1}`, `${mssv1}`, `${lop1}`: sinh viên 1
+* `${hoTenSV2}`, `${mssv2}`, `${lop2}`: sinh viên 2
+* `${tenDeTai}`
+* `${tenGVHD}`
+* `${thuyetMinh_Dat}`
+* `${thuyetMinh_KhongDat}`
+* `${ndDieuChinh}`
+* `${uuDiem}`
+* `${thieuSot}`
+* `${maxPhanTich}`
+* `${diemPhanTich1}`, `${diemPhanTich2}`
+* `${maxThietKe}`
+* `${diemThietKe1}`, `${diemThietKe2}`
+* `${maxHienThuc}`
+* `${diemHienThuc1}`, `${diemHienThuc2}`
+* `${maxBaoCao}`
+* `${diemBaoCao1}`, `${diemBaoCao2}`
+* `${diemTongCong1}`, `${diemTongCong2}`
+* `${diemFinal1}`, `${diemFinal2}`
+* `${cauHoi}`
+* `${deNghi_Duoc}`
+* `${deNghi_Khong}`
+* `${deNghi_BoSung}`
+
+Phần cuối của file 2sv lặp lại 2 khối đánh giá riêng cho từng sinh viên, mỗi khối gồm họ tên, MSSV, điểm thang 10 và lựa chọn đề nghị bảo vệ. 
+
+**3) Điểm khác nhau chính để bạn code**
+
+File 1sv chỉ cần 1 object sinh viên, còn file 2sv cần 2 object sinh viên. Bảng điểm của file 1sv chỉ map vào các biến `...1`, còn file 2sv map cả `...1` và `...2`. Còn lại phần nội dung nhận xét, tên đề tài, giảng viên, câu hỏi và phần ngày ký là giống nhau về cấu trúc.
+
+Nếu bạn code thì có thể tách dữ liệu thành kiểu này:
+
+```js
+const data = {
+  tenDeTai: "",
+  tenGVHD: "",
+  thuyetMinh_Dat: "",
+  thuyetMinh_KhongDat: "",
+  ndDieuChinh: "",
+  uuDiem: "",
+  thieuSot: "",
+  cauHoi: "",
+  sinhVien: [
+    {
+      hoTen: "",
+      mssv: "",
+      lop: "",
+      diemPhanTich: "",
+      diemThietKe: "",
+      diemHienThuc: "",
+      diemBaoCao: "",
+      diemTongCong: "",
+      diemFinal: "",
+      deNghi: ""
+    }
+  ]
+}
+```
+
+Với file 1sv thì `sinhVien` có 1 phần tử, còn file 2sv thì có 2 phần tử.
+
+Mình có thể làm tiếp cho bạn một bản **liệt kê biến theo dạng JSON mapping** để bạn đem đi replace template trực tiếp.

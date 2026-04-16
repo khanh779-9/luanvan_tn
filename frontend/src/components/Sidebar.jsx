@@ -1,0 +1,171 @@
+import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import {
+  HiOutlineHome,
+  HiOutlineUsers,
+  HiOutlineAcademicCap,
+  HiOutlineUserGroup,
+  HiOutlineDocumentText,
+  HiOutlineClipboardDocumentCheck,
+  HiOutlineChartBar,
+  HiOutlineCog6Tooth,
+  HiOutlinePencilSquare,
+  HiArrowRightOnRectangle,
+} from "react-icons/hi2";
+import { useAuth } from "../context/AuthContext";
+import { logout } from "../services/authService";
+
+export default function Sidebar({ isOpen, onClose }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user: contextUser, clearAuth } = useAuth();
+
+  // Lấy user từ context hoặc localStorage
+  const getUser = () => {
+    if (contextUser && contextUser.name && contextUser.role) return contextUser;
+    try {
+      const userStr = localStorage.getItem("user");
+      if (!userStr) return null;
+      return typeof userStr === "string" ? JSON.parse(userStr) : userStr;
+    } catch {
+      return null;
+    }
+  };
+  const user = getUser();
+  let role = user?.role?.toLowerCase();
+
+  // Gộp tất cả các vai trò không phải thư ký (UyVien, Chủ tịch, GVHD, GVPB...) vào 'gv' để render Sidebar
+  if (role && role !== "thuky") {
+    role = "gv";
+  }
+  // Menu cấu hình theo role
+  const menuConfig = {
+    thuky: [
+      { label: "Tổng quan", path: "/admin/tong-quan", icon: HiOutlineHome },
+      { label: "Sinh viên", path: "/admin/sinhvien", icon: HiOutlineUsers },
+      {
+        label: "Giảng viên",
+        path: "/admin/giangvien",
+        icon: HiOutlineAcademicCap,
+      },
+      {
+        label: "Nhập liệu",
+        path: "/admin/nhaplieu",
+        icon: HiOutlineDocumentText,
+      },
+      { label: "Phân công", path: "/admin/phancong", icon: HiOutlineUserGroup },
+      { label: "Giai đoạn", path: "/admin/giaidoan", icon: HiOutlineCog6Tooth },
+    ],
+    gv: [
+      { label: "Tổng quan", path: "/gv/tong-quan", icon: HiOutlineHome },
+      {
+        label: "Chấm giữa kỳ",
+        path: "/gv/giua-ky",
+        icon: HiOutlineChartBar,
+      },
+      {
+        label: "Chấm hướng dẫn",
+        path: "/gv/huongdan",
+        icon: HiOutlinePencilSquare,
+      },
+      {
+        label: "Chấm phản biện",
+        path: "/gv/phanbien",
+        icon: HiOutlineClipboardDocumentCheck,
+      },
+      {
+        label: "Chấm hội đồng",
+        path: "/gv/hoidong",
+        icon: HiOutlineUserGroup,
+      },
+    ],
+  };
+
+  const roleLabels = {
+    thuky: "Thư ký khoa",
+    gv: "Giảng viên",
+  };
+
+  const menuItems =
+    role && menuConfig[role]
+      ? menuConfig[role]
+      : [{ label: "Tổng quan", path: "/", icon: HiOutlineHome }];
+
+  const getRoleLabel = () => {
+    if (!role) return "";
+    return roleLabels[role] || "Người dùng";
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {}
+    clearAuth();
+    navigate("/login");
+  };
+
+  return (
+    <div
+      className={`fixed z-40 left-0 top-0 w-64 h-screen bg-white border-r border-slate-200 flex flex-col transition-transform ${isOpen ? "" : "-translate-x-full"} md:translate-x-0 md:static`}
+    >
+      <div className="px-6 py-6 border-b border-slate-200 flex items-center justify-between">
+        <span className="text-lg font-semibold text-slate-800">
+          QL Luận văn
+        </span>
+        <button
+          className="md:hidden text-slate-400 hover:text-slate-600"
+          onClick={onClose}
+        >
+          &times;
+        </button>
+      </div>
+
+      <nav className="flex-1 overflow-y-auto py-4">
+        {menuItems.length === 0 ? (
+          <div className="px-6 text-sm text-slate-400">
+            Không có chức năng phù hợp
+          </div>
+        ) : (
+          menuItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.path;
+            return (
+              <div
+                key={item.path}
+                onClick={() => {
+                  navigate(item.path);
+                  if (onClose) onClose();
+                }}
+                className={`flex items-center gap-3 px-6 py-3 text-sm cursor-pointer transition-colors ${
+                  isActive
+                    ? "bg-blue-50 text-blue-600 border-l-4 border-l-blue-600 font-medium"
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent"
+                }`}
+              >
+                <Icon size={18} />
+                <span>{item.label}</span>
+              </div>
+            );
+          })
+        )}
+      </nav>
+
+      <div className="border-t border-slate-200 px-6 py-4 bg-slate-50">
+        <p
+          className="text-sm font-medium text-slate-800 truncate"
+          title={user?.name || "Người dùng"}
+        >
+          Xin chào, {user?.name || "Người dùng"}
+        </p>
+        <p className="text-xs text-slate-500 mt-0.5">{getRoleLabel()}</p>
+        <div
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1.5 -mx-2 mt-3 rounded transition-colors text-sm cursor-pointer w-fit font-medium"
+        >
+          <HiArrowRightOnRectangle size={18} />
+          <span>Đăng xuất</span>
+        </div>
+      </div>
+    </div>
+  );
+}
