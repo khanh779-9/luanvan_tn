@@ -345,7 +345,7 @@ CREATE TABLE giai_doan (
   id INT AUTO_INCREMENT PRIMARY KEY,
   mo_ta VARCHAR(255),
   loai ENUM('deadline','process','milestone'),
-  `data` TEXT NULL DEFAULT '{ "con_phancong":false, "con_dangky": false, "con_chamGK":false, "con_chamPB":false, "con_chamHD":false }',
+  `data` TEXT NULL DEFAULT ('{ "con_phancong":false, "con_dangky": false, "con_chamGK":false, "con_chamPB":false, "con_chamHD":false }'),
   ngay_bat_dau DATE,
   ngay_ket_thuc DATE
 );
