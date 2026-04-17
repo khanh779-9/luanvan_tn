@@ -129,7 +129,31 @@ export default function AdminGiaiDoanPage() {
         ngay_ket_thuc: formNgayKetThuc,
       },
     });
+
   };
+
+   const handleSaveThoiGianTuyChinh = async (date) => {
+      try {
+        await setThoiGianTuyChinh({
+          thoiGianTuyChinh: date,
+        });
+      } catch (error) {
+        console.error("Lỗi khi lưu thời gian tuỳ chỉnh:", error);
+      }
+    };
+
+      const handleSaveUseCustomTime = async (useCustom) => {
+        try {
+          await setThoiGianTuyChinh({
+            thoiGianTuyChinh: useCustom,
+          });
+        } catch (error) {
+          console.error("Lỗi khi lưu tuỳ chọn dùng thời gian tuỳ chỉnh:", error);
+        } 
+      };
+
+
+
 
   return (
     <div>
@@ -203,7 +227,11 @@ export default function AdminGiaiDoanPage() {
                 type="checkbox"
                 className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500"
                 checked={useCustom}
-                onChange={(e) => setUseCustom(e.target.checked)}
+                onChange={(e) => {
+                  setUseCustom(e.target.checked);
+                  handleSaveUseCustomTime(e.target.checked);
+                  handleSaveThoiGianTuyChinh(e.target.checked ? customDate : null);
+                }}
               />
               Dùng thời gian hiện tại tuỳ chỉnh (tắt: dùng thời gian thực tế của
               hệ thống)
