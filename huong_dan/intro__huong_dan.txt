@@ -25,9 +25,9 @@ Các biến xuất hiện trong file 1sv:
 * `${diemTongCong1}`: tổng điểm
 * `${diemFinal1}`: điểm chấm thang 10
 * `${cauHoi}`: câu hỏi dành cho sinh viên
-* `${deNghi_Duoc}`: ô/đánh dấu “Được bảo vệ”
-* `${deNghi_Khong}`: ô/đánh dấu “Không được bảo vệ”
-* `${deNghi_BoSung}`: ô/đánh dấu “Bổ sung/hiệu chỉnh để được bảo vệ”
+* `${deNghi_Duoc}`: ô/đánh dấu “Được bảo vệ” (mình đánh v)
+* `${deNghi_Khong}`: ô/đánh dấu “Không được bảo vệ” (mình đánh v)
+* `${deNghi_BoSung}`: ô/đánh dấu “Bổ sung/hiệu chỉnh để được bảo vệ” (mình đánh v)
 
 Ngoài ra file có phần cố định như “TP. Hồ Chí Minh, ngày 05 tháng 01 năm 2025”, và chữ ký giảng viên hướng dẫn. 
 
