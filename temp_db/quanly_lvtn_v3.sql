@@ -92,7 +92,7 @@ CREATE TABLE detai (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 alter table detai 
-add column data_json TEXT NULL DEFAULT ('{ "tong_diem": "", "nhanXet": "", "uuDiem": "", "thieuSot": "", "ndDieuChinh": "", "cauHoi": "", "thuyetMinh": "", "sinh_viens": [ { "mssv": "", "hoTen": "", "lop": "", "diemPhanTich": "", "diemThietKe": "", "diemHienThuc": "", "diemBaoCao": "", "diemTongCong": "", "diemFinal": "", "deNghi": "" }]}')
+add column data_json TEXT NULL DEFAULT '{ "gvhd": { "tong_diem": "", "nhanXet": "", "uuDiem": "", "thieuSot": "", "ndDieuChinh": "", "cauHoi": "", "thuyetMinh": "", "sinh_viens": [ { "mssv": "", "hoTen": "", "lop": "", "diemPhanTich": "", "diemThietKe": "", "diemHienThuc": "", "diemBaoCao": "", "diemTongCong": "", "diemFinal": "", "deNghi": "" } ] }, "gvpb": { "tong_diem": "", "nhanXet": "", "uuDiem": "", "thieuSot": "", "ndDieuChinh": "", "cauHoi": "", "thuyetMinh": "", "sinh_viens": [ { "mssv": "", "hoTen": "", "lop": "", "diemPhanTich": "", "diemThietKe": "", "diemHienThuc": "", "diemBaoCao": "", "diemTongCong": "", "diemFinal": "", "deNghi": "" } ] } }';
 
 
 INSERT INTO detai VALUES

@@ -60,26 +60,24 @@ export default function GVHDHuongDanPage() {
 
   function openEdit(deTai) {
     setEditDeTai(deTai);
-    // Chuẩn bị dữ liệu cho form, nếu đã có thì fill vào
-    let nhanXet = deTai.nhanXetHuongDan ?? '';
-    let tong = deTai.diemHuongDan ?? '';
-    // Nếu có dữ liệu chi tiết thì fill, chưa có thì để rỗng
+    // Nếu có data_json.gvhd thì fill vào form, không thì lấy từ các trường cũ
+    const gvhd = deTai.data_json && deTai.data_json.gvhd ? deTai.data_json.gvhd : {};
     setEditForm(f => ({
       ...f,
-      tong_diem: tong,
-      nhanXet: nhanXet,
-      uuDiem: deTai.uuDiem ?? '',
-      thieuSot: deTai.thieuSot ?? '',
-      ndDieuChinh: deTai.ndDieuChinh ?? '',
-      cauHoi: deTai.cauHoi ?? '',
-      thuyetMinh: deTai.thuyetMinh ?? '',
-      diemPhanTich: Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemPhanTich ?? '') : [''],
-      diemThietKe: Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemThietKe ?? '') : [''],
-      diemHienThuc: Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemHienThuc ?? '') : [''],
-      diemBaoCao: Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemBaoCao ?? '') : [''],
-      diemTongCong: Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemTongCong ?? '') : [''],
-      diemFinal: Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemFinal ?? '') : [''],
-      deNghi: Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.deNghi ?? '') : [''],
+      tong_diem: gvhd.tong_diem ?? deTai.diemHuongDan ?? '',
+      nhanXet: gvhd.nhanXet ?? deTai.nhanXetHuongDan ?? '',
+      uuDiem: gvhd.uuDiem ?? deTai.uuDiem ?? '',
+      thieuSot: gvhd.thieuSot ?? deTai.thieuSot ?? '',
+      ndDieuChinh: gvhd.ndDieuChinh ?? deTai.ndDieuChinh ?? '',
+      cauHoi: gvhd.cauHoi ?? deTai.cauHoi ?? '',
+      thuyetMinh: gvhd.thuyetMinh ?? deTai.thuyetMinh ?? '',
+      diemPhanTich: Array.isArray(gvhd.sinh_viens) ? gvhd.sinh_viens.map(sv => sv.diemPhanTich ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemPhanTich ?? '') : ['']),
+      diemThietKe: Array.isArray(gvhd.sinh_viens) ? gvhd.sinh_viens.map(sv => sv.diemThietKe ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemThietKe ?? '') : ['']),
+      diemHienThuc: Array.isArray(gvhd.sinh_viens) ? gvhd.sinh_viens.map(sv => sv.diemHienThuc ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemHienThuc ?? '') : ['']),
+      diemBaoCao: Array.isArray(gvhd.sinh_viens) ? gvhd.sinh_viens.map(sv => sv.diemBaoCao ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemBaoCao ?? '') : ['']),
+      diemTongCong: Array.isArray(gvhd.sinh_viens) ? gvhd.sinh_viens.map(sv => sv.diemTongCong ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemTongCong ?? '') : ['']),
+      diemFinal: Array.isArray(gvhd.sinh_viens) ? gvhd.sinh_viens.map(sv => sv.diemFinal ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemFinal ?? '') : ['']),
+      deNghi: Array.isArray(gvhd.sinh_viens) ? gvhd.sinh_viens.map(sv => sv.deNghi ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.deNghi ?? '') : ['']),
     }));
     setSaveSuccess(false);
     setShowEditModal(true);
@@ -311,31 +309,49 @@ export default function GVHDHuongDanPage() {
                       diemFinal: editForm.diemFinal,
                       deNghi: editForm.deNghi,
                       data_json: {
-                        tong_diem: editForm.tong_diem,
-                        nhanXet: editForm.nhanXet,
-                        uuDiem: editForm.uuDiem,
-                        thieuSot: editForm.thieuSot,
-                        ndDieuChinh: editForm.ndDieuChinh,
-                        cauHoi: editForm.cauHoi,
-                        thuyetMinh: editForm.thuyetMinh,
-                        diemPhanTich: editForm.diemPhanTich,
-                        diemThietKe: editForm.diemThietKe,
-                        diemHienThuc: editForm.diemHienThuc,
-                        diemBaoCao: editForm.diemBaoCao,
-                        diemTongCong: editForm.diemTongCong,
-                        diemFinal: editForm.diemFinal,
-                        deNghi: editForm.deNghi,
-                        sinh_viens: Array.isArray(editDeTai.sinh_viens) ? editDeTai.sinh_viens.map((sv, idx) => ({
-                          mssv: sv.mssv,
-                          hoTen: sv.hoTen,
-                          diemPhanTich: editForm.diemPhanTich[idx] ?? '',
-                          diemThietKe: editForm.diemThietKe[idx] ?? '',
-                          diemHienThuc: editForm.diemHienThuc[idx] ?? '',
-                          diemBaoCao: editForm.diemBaoCao[idx] ?? '',
-                          diemTongCong: editForm.diemTongCong[idx] ?? '',
-                          diemFinal: editForm.diemFinal[idx] ?? '',
-                          deNghi: editForm.deNghi[idx] ?? '',
-                        })) : [],
+                        gvhd: {
+                          tong_diem: editForm.tong_diem,
+                          nhanXet: editForm.nhanXet,
+                          uuDiem: editForm.uuDiem,
+                          thieuSot: editForm.thieuSot,
+                          ndDieuChinh: editForm.ndDieuChinh,
+                          cauHoi: editForm.cauHoi,
+                          thuyetMinh: editForm.thuyetMinh,
+                          sinh_viens: Array.isArray(editDeTai.sinh_viens) ? editDeTai.sinh_viens.map((sv, idx) => ({
+                            mssv: sv.mssv,
+                            hoTen: sv.hoTen,
+                            lop: sv.lop ?? '',
+                            diemPhanTich: editForm.diemPhanTich[idx] ?? '',
+                            diemThietKe: editForm.diemThietKe[idx] ?? '',
+                            diemHienThuc: editForm.diemHienThuc[idx] ?? '',
+                            diemBaoCao: editForm.diemBaoCao[idx] ?? '',
+                            diemTongCong: editForm.diemTongCong[idx] ?? '',
+                            diemFinal: editForm.diemFinal[idx] ?? '',
+                            deNghi: editForm.deNghi[idx] ?? '',
+                          })) : [],
+                        },
+                        // Nếu muốn giữ nguyên dữ liệu gvpb thì lấy từ editDeTai.data_json.gvpb nếu có
+                        gvpb: (editDeTai.data_json && editDeTai.data_json.gvpb) ? editDeTai.data_json.gvpb : {
+                          tong_diem: '',
+                          nhanXet: '',
+                          uuDiem: '',
+                          thieuSot: '',
+                          ndDieuChinh: '',
+                          cauHoi: '',
+                          thuyetMinh: '',
+                          sinh_viens: Array.isArray(editDeTai.sinh_viens) ? editDeTai.sinh_viens.map(sv => ({
+                            mssv: sv.mssv,
+                            hoTen: sv.hoTen,
+                            lop: sv.lop ?? '',
+                            diemPhanTich: '',
+                            diemThietKe: '',
+                            diemHienThuc: '',
+                            diemBaoCao: '',
+                            diemTongCong: '',
+                            diemFinal: '',
+                            deNghi: '',
+                          })) : [],
+                        }
                       },
                     },
                   });
