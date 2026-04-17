@@ -33,8 +33,9 @@ export default function MainLayout({ role }) {
         </div>
 
         <div className="p-4 md:p-8">
-          <StageStatusBanner />
-          <Outlet />
+          <StageStatusBanner>
+            <Outlet />
+          </StageStatusBanner>
         </div>
       </main>
     </div>

@@ -11,9 +11,7 @@ use PhpOffice\PhpWord\Settings;
 
 class DeTaiController extends Controller
 {
-    // Lấy danh sách đề tài
-
-    // Lấy danh sách đề tài, filter nâng cao
+    
     public function index(Request $request)
     {
         $query = DeTai::query();
@@ -59,7 +57,7 @@ class DeTaiController extends Controller
         return response()->json($result);
     }
 
-    // Lấy 1 đề tài
+   
     public function show($id)
     {
         $detai = DeTai::find($id);
@@ -67,8 +65,7 @@ class DeTaiController extends Controller
         return response()->json($detai);
     }
 
-    // Thêm đề tài
-
+   
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -82,9 +79,7 @@ class DeTaiController extends Controller
         $detai = DeTai::create($validated);
         return response()->json($detai, 201);
     }
-
-    // Cập nhật đề tài
-
+ 
     public function update(Request $request, $id)
     {
         $detai = DeTai::find($id);

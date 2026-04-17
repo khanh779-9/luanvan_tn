@@ -21,7 +21,6 @@ class GiangVienController extends Controller
             $gv->so_dt_pb = \App\Models\DeTai::where('maGV_PB', $gv->maGV)->count();
             $gv->so_hd = \App\Models\ThanhVienHoiDong::where('maGV', $gv->maGV)->count();
         }
-        // Đảm bảo trả về đúng camelCase
         return response()->json(['data' => $list]);
     }
 

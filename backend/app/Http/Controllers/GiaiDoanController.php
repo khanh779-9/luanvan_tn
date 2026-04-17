@@ -10,9 +10,9 @@ use App\Models\CauHinh;
 
 class GiaiDoanController extends Controller
 {
-    // cột data có cấu trúc { "con_phancong":"false", "con_dangky": "false", "con_chamGK":"false", "con_chamPB":"false", "con_chamHD":"false" }
+    // cột data có cấu trúc { "con_phancong_hd":false, "con_phancong_pb":false, "con_dangky": false, "con_chamGK":false, "con_chamPB":false, "con_chamHD":false }
 
-    // Lấy danh sách tất cả giai đoạn
+  
     public function index()
     {
         $giaiDoans = GiaiDoan::all();
@@ -21,8 +21,7 @@ class GiaiDoanController extends Controller
         }
         return response()->json($giaiDoans, 200, [], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
-
-    // Cập nhật giai đoạn
+ 
     public function update(Request $request, $id)
     {
         $giaiDoan = GiaiDoan::find($id);
@@ -41,9 +40,7 @@ class GiaiDoanController extends Controller
         return response()->json(['message' => 'Tạo giai đoạn thành công', 'data' => $giaiDoan], 201);
     }
 
-
-
-    // Lấy giai đoạn hiện tại theo ngày
+ 
     public function current()
     {
         // $today = date('Y-m-d');

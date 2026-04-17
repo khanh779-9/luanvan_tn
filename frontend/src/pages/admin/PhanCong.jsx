@@ -1,13 +1,18 @@
-// Trang phân công cho thư ký
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import { getAssignments, updateAssignment, deleteAssignment } from '../../services/phanCongService';
 import { getLecturers } from '../../services/giangVienService';
+import Pagination from '../../components/common/Pagination';
+import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 export default function AdminPhanCongPage() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [page, setPage] = useState(1);
+  
   const [showFormModal, setShowFormModal] = useState(false);
   const [editItem, setEditItem] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -16,9 +21,19 @@ export default function AdminPhanCongPage() {
   const [formGVHD, setFormGVHD] = useState('');
   const [formGVPB, setFormGVPB] = useState('');
 
+  // Debounce search update
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+      setPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  // Fetch dữ liệu phân công (đã hỗ trợ phân trang)
   const { data: pcData, isLoading } = useQuery({
-    queryKey: ['phancong'],
-    queryFn: getAssignments,
+    queryKey: ['phancong', page, debouncedSearch],
+    queryFn: () => getAssignments({ page, q: debouncedSearch, per_page: 15 }),
   });
 
   const { data: gvData } = useQuery({
@@ -60,17 +75,12 @@ export default function AdminPhanCongPage() {
     });
   };
 
-  const filtered = useMemo(() => {
-    if (!pcData?.data) return [];
-    if (!search.trim()) return pcData.data;
-    const q = search.toLowerCase();
-    return pcData.data.filter(pc =>
-      pc.tenDeTai?.toLowerCase().includes(q) ||
-      pc.sinh_vien?.some(sv => sv.hoTen?.toLowerCase().includes(q) || sv.mssv?.toLowerCase().includes(q)) ||
-      pc.giang_vien_h_d?.tenGV?.toLowerCase().includes(q) ||
-      pc.giang_vien_p_b?.tenGV?.toLowerCase().includes(q)
-    );
-  }, [pcData, search]);
+  // Thay vì filter nội bộ trên mảng, lấy data từ JSON paginated response backend trả về
+  const filtered = pcData?.data || [];
+  const total = pcData?.total || 0;
+  const perPage = pcData?.per_page || 15;
+  const start = (page - 1) * perPage + 1;
+  const end = Math.min(page * perPage, total);
 
   return (
     <div>
@@ -155,77 +165,60 @@ export default function AdminPhanCongPage() {
         </table>
       </div>
 
-      {showFormModal && editItem && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-lg w-full mx-4 shadow-xl">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">Sửa phân công Đề tài</h3>
-            <div className="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-              <span className="text-sm font-semibold text-slate-700 block mb-1">Tên đề tài:</span>
-              <span className="text-sm text-slate-600">{editItem.tenDeTai}</span>
-            </div>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Giảng viên Hướng Dẫn</label>
-                <select
-                  value={formGVHD}
-                  onChange={e => setFormGVHD(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="">-- Chưa phân công --</option>
-                  {gvList.map(gv => (
-                    <option key={gv.maGV} value={gv.maGV}>{gv.tenGV} ({gv.maGV})</option>
-                  ))}
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Giảng viên Phản Biện</label>
-                <select
-                  value={formGVPB}
-                  onChange={e => setFormGVPB(e.target.value)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="">-- Chưa phân công --</option>
-                  {gvList.map(gv => (
-                    <option key={gv.maGV} value={gv.maGV}>{gv.tenGV} ({gv.maGV})</option>
-                  ))}
-                </select>
-              </div>
-            </div>
+      <Pagination 
+        page={page} 
+        setPage={setPage} 
+        total={total} 
+        perPage={perPage} 
+        itemName="bản ghi" 
+      />
 
-            <div className="flex justify-end gap-3 mt-8">
-              <button onClick={() => setShowFormModal(false)} className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
-                Hủy
-              </button>
-              <button 
-                onClick={handleSave} 
-                disabled={updateMut.isPending}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition-colors disabled:opacity-50"
-              >
-                {updateMut.isPending ? 'Đang lưu...' : 'Lưu phân công'}
-              </button>
-            </div>
+      {showFormModal && editItem && (
+        <Modal isOpen={true} onClose={() => { setShowFormModal(false); setEditItem(null); }} title="Cập nhật phân công" maxWidth="max-w-lg">
+          <div className="mb-4">
+            <p className="text-sm text-slate-500 mb-1">Đề tài</p>
+            <p className="font-medium text-slate-800">{editItem.tenDeTai}</p>
           </div>
-        </div>
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-slate-700 mb-2">Giảng viên hướng dẫn</p>
+            <select
+              value={formGVHD}
+              onChange={e => setFormGVHD(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+            >
+              <option value="">-- Chưa phân công --</option>
+              {gvList.map(g => <option key={g.maGV} value={g.maGV}>{g.tenGV} ({g.maGV})</option>)}
+            </select>
+          </div>
+          <div className="mb-6">
+            <p className="text-sm font-semibold text-slate-700 mb-2">Giảng viên phản biện</p>
+            <select
+              value={formGVPB}
+              onChange={e => setFormGVPB(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none"
+            >
+              <option value="">-- Chưa phân công --</option>
+              {gvList.map(g => <option key={g.maGV} value={g.maGV}>{g.tenGV} ({g.maGV})</option>)}
+            </select>
+          </div>
+          <div className="flex justify-end gap-3">
+            <button onClick={() => { setShowFormModal(false); setEditItem(null); }} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg border border-slate-200">Hủy</button>
+            <button onClick={handleSave} disabled={updateMut.isPending} className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium disabled:opacity-50">
+              {updateMut.isPending ? 'Đang lưu...' : 'Lưu phân công'}
+            </button>
+          </div>
+        </Modal>
       )}
 
       {showDeleteConfirm && deleteItem && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-auto text-center shadow-xl">
-            <HiOutlineExclamationTriangle className="text-red-500 mx-auto mb-4" size={48} />
-            <h3 className="text-lg font-bold text-slate-900 mb-2">Xóa phân công?</h3>
-            <p className="text-sm text-slate-500 mb-6">Bạn có chắc muốn gỡ GVHD và GVPB khỏi đề tài này? Hành động này không thể hoàn tác.</p>
-            <div className="flex justify-center gap-3">
-              <button onClick={() => { setShowDeleteConfirm(false); setDeleteItem(null); }}
-                className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 font-medium py-2 rounded-lg transition-colors text-sm">Trở lại</button>
-              <button onClick={() => deleteMut.mutate(deleteItem.maDeTai)} disabled={deleteMut.isPending}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-medium py-2 rounded-lg transition-colors text-sm disabled:opacity-50">
-                {deleteMut.isPending ? 'Đang xóa...' : 'Xác nhận gỡ'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal 
+          isOpen={true}
+          title="Xóa phân công?"
+          message={`Hủy bỏ phân công GVHD và GVPB của đề tài "${deleteItem.tenDeTai}"? Hành động này không thể hoàn tác.`}
+          onConfirm={() => deleteMut.mutate(deleteItem.maDeTai)}
+          onCancel={() => { setShowDeleteConfirm(false); setDeleteItem(null); }}
+          loading={deleteMut.isPending}
+        />
       )}
     </div>
   );

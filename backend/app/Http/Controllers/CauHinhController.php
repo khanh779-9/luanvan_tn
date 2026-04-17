@@ -7,7 +7,7 @@ use App\Models\CauHinh;
 
 class CauHinhController extends Controller
 {
-    // Lấy trạng thái và ngày tuỳ chỉnh
+   
     public function getThoiGianTuyChinh()
     {
         $tgTuyChinh = CauHinh::where('key', 'tg_TuyChinh')->first();
@@ -18,7 +18,7 @@ class CauHinhController extends Controller
         ]);
     }
 
-    // Cập nhật trạng thái và ngày tuỳ chỉnh
+    
     public function setThoiGianTuyChinh(Request $request)
     {
         $validated = $request->validate([

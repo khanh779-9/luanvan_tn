@@ -1,8 +1,10 @@
 import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { HiOutlineXMark, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import { getList, createRecord, updateRecord, deleteRecord, importExcel } from '../../services/nhapLieuService';
 import api from '../../services/api';
+import Pagination from '../../components/common/Pagination';
+import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 const STATUS_MAP = {
   cho_duyet: { label: 'Chờ duyệt', cls: 'bg-amber-50 text-amber-700' },
@@ -170,21 +172,13 @@ export default function AdminNhapLieuPage() {
         </div>
       </div>
 
-      {total > perPage && (
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-sm text-slate-500">Hiển thị {start}-{end} / {total} bản ghi</span>
-          <div className="flex gap-1">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-              className="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50">Trước</button>
-            {[...Array(Math.min(Math.ceil(total / perPage), 10))].map((_, i) => (
-              <button key={i} onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 text-sm border rounded ${page === i + 1 ? 'bg-blue-500 text-white border-blue-500' : 'border-slate-200 hover:bg-slate-50'}`}>{i + 1}</button>
-            ))}
-            <button onClick={() => setPage(p => Math.min(Math.ceil(total / perPage), p + 1))} disabled={page >= Math.ceil(total / perPage)}
-              className="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50">Sau</button>
-          </div>
-        </div>
-      )}
+      <Pagination 
+        page={page} 
+        setPage={setPage} 
+        total={total} 
+        perPage={perPage} 
+        itemName="bản ghi" 
+      />
 
       {showImportModal && <ImportModal onClose={() => setShowImportModal(false)} />}
 
@@ -193,21 +187,15 @@ export default function AdminNhapLieuPage() {
       )}
 
       {showDeleteConfirm && deleteItem && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => { setShowDeleteConfirm(false); setDeleteItem(null); }}>
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
-            <HiOutlineExclamationTriangle className="text-red-500 mx-auto mb-3" size={40} />
-            <h3 className="text-xl font-semibold text-slate-900">Xóa bản đăng ký?</h3>
-            <p className="text-sm text-slate-500 mt-2">Bạn có chắc muốn xóa bản ghi của {deleteItem.student1_name}? Hành động này không thể hoàn tác.</p>
-            <div className="flex justify-center gap-3 mt-6">
-              <button onClick={() => { setShowDeleteConfirm(false); setDeleteItem(null); }}
-                className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm rounded-lg">Hủy</button>
-              <button onClick={() => deleteMut.mutate(deleteItem.id)} disabled={deleteMut.isPending}
-                className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-                {deleteMut.isPending ? 'Đang xóa...' : 'Xóa'}
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal 
+          isOpen={true}
+          title="Xóa bản đăng ký?"
+          message={`Bạn có chắc muốn xóa bản ghi của ${deleteItem.student1_name}? Hành động này không thể hoàn tác.`}
+          onConfirm={() => deleteMut.mutate(deleteItem.id)}
+          onCancel={() => { setShowDeleteConfirm(false); setDeleteItem(null); }}
+          loading={deleteMut.isPending}
+          confirmText="Xóa"
+        />
       )}
     </div>
   );
@@ -232,47 +220,41 @@ function ImportModal({ onClose }) {
   });
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600" aria-label="Đóng">
-          <HiOutlineXMark size={20} />
-        </button>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Import đăng ký đề tài từ Excel</h2>
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">File Excel</label>
-          <input type="file" accept=".xlsx,.xls" onChange={e => setFile(e.target.files[0] || null)}
-            className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
-        </div>
-        <button onClick={() => importMut.mutate()} disabled={!file || importMut.isPending}
-          className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-          {importMut.isPending ? 'Đang xử lý...' : 'Import'}
-        </button>
-        {importMut.isError && <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-lg mt-4">Không thể import file. Vui lòng thử lại.</div>}
-        {result && (
-          <div className="mt-4">
-            {result.imported > 0 && <div className="bg-green-50 text-green-700 text-sm px-4 py-3 rounded-lg">Đã import {result.imported} bản ghi thành công.</div>}
-            {result.errors?.length > 0 && (
-              <div className="mt-3 border border-amber-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead><tr className="bg-amber-50">
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Sheet</th>
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Lỗi</th>
-                  </tr></thead>
-                  <tbody>
-                    {result.errors.map((err, i) => (
-                      <tr key={i} className="border-t border-amber-100">
-                        <td className="px-3 py-2 text-sm text-slate-700">{err.sheet || err.row || i + 1}</td>
-                        <td className="px-3 py-2 text-sm text-slate-700">{err.message}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
+    <Modal isOpen={true} onClose={onClose} title="Import đăng ký đề tài từ Excel" maxWidth="max-w-lg">
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-slate-700 mb-1">File Excel</label>
+        <input type="file" accept=".xlsx,.xls" onChange={e => setFile(e.target.files[0] || null)}
+          className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
       </div>
-    </div>
+      <button onClick={() => importMut.mutate()} disabled={!file || importMut.isPending}
+        className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+        {importMut.isPending ? 'Đang xử lý...' : 'Import'}
+      </button>
+      {importMut.isError && <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-lg mt-4">Không thể import file. Vui lòng thử lại.</div>}
+      {result && (
+        <div className="mt-4">
+          {result.imported > 0 && <div className="bg-green-50 text-green-700 text-sm px-4 py-3 rounded-lg">Đã import {result.imported} bản ghi thành công.</div>}
+          {result.errors?.length > 0 && (
+            <div className="mt-3 border border-amber-200 rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead><tr className="bg-amber-50">
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Sheet</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Lỗi</th>
+                </tr></thead>
+                <tbody>
+                  {result.errors.map((err, i) => (
+                    <tr key={i} className="border-t border-amber-100">
+                      <td className="px-3 py-2 text-sm text-slate-700">{err.sheet || err.row || i + 1}</td>
+                      <td className="px-3 py-2 text-sm text-slate-700">{err.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </Modal>
   );
 }
 
@@ -326,125 +308,119 @@ function FormModal({ editItem, onClose }) {
   const isHaiSV = form.topic_type === 'hai_sinh_vien';
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600" aria-label="Đóng">
-          <HiOutlineXMark size={20} />
-        </button>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">{editItem ? 'Sửa bản đăng ký' : 'Thêm bản đăng ký'}</h2>
-        <form onSubmit={handleSubmit}>
-          {/* Đề tài */}
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Tên đề tài</label>
-            <input type="text" value={form.topic_title} onChange={e => handleChange('topic_title', e.target.value)} disabled={loading}
-              className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.topic_title ? 'border-red-300' : 'border-slate-200'}`} />
-            {errors.topic_title && <p className="text-red-500 text-xs mt-1">{errors.topic_title[0]}</p>}
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả đề tài</label>
-            <textarea rows={2} value={form.topic_description} onChange={e => handleChange('topic_description', e.target.value)} disabled={loading}
-              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Loại</label>
-            <select value={form.topic_type} onChange={e => handleChange('topic_type', e.target.value)} disabled={loading}
-              className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm bg-white disabled:opacity-50">
-              <option value="mot_sinh_vien">1 sinh viên</option>
-              <option value="hai_sinh_vien">2 sinh viên</option>
-            </select>
-          </div>
+    <Modal isOpen={true} onClose={onClose} title={editItem ? 'Sửa bản đăng ký' : 'Thêm bản đăng ký'} maxWidth="max-w-2xl">
+      <form onSubmit={handleSubmit}>
+        {/* Đề tài */}
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Tên đề tài</label>
+          <input type="text" value={form.topic_title} onChange={e => handleChange('topic_title', e.target.value)} disabled={loading}
+            className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.topic_title ? 'border-red-300' : 'border-slate-200'}`} />
+          {errors.topic_title && <p className="text-red-500 text-xs mt-1">{errors.topic_title[0]}</p>}
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả đề tài</label>
+          <textarea rows={2} value={form.topic_description} onChange={e => handleChange('topic_description', e.target.value)} disabled={loading}
+            className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Loại</label>
+          <select value={form.topic_type} onChange={e => handleChange('topic_type', e.target.value)} disabled={loading}
+            className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm bg-white disabled:opacity-50">
+            <option value="mot_sinh_vien">1 sinh viên</option>
+            <option value="hai_sinh_vien">2 sinh viên</option>
+          </select>
+        </div>
 
-          {/* SV 1 */}
-          <p className="text-sm font-semibold text-slate-600 mb-2 mt-4">Sinh viên 1</p>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">MSSV</label>
-              <input type="text" value={form.student1_id} onChange={e => handleChange('student1_id', e.target.value)} disabled={loading}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-            </div>
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">Họ tên</label>
-              <input type="text" value={form.student1_name} onChange={e => handleChange('student1_name', e.target.value)} disabled={loading}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-            </div>
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">Lớp</label>
-              <input type="text" value={form.student1_class} onChange={e => handleChange('student1_class', e.target.value)} disabled={loading}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-            </div>
-            <div>
-              <label className="block text-xs text-slate-500 mb-1">Email</label>
-              <input type="email" value={form.student1_email} onChange={e => handleChange('student1_email', e.target.value)} disabled={loading}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-            </div>
+        {/* SV 1 */}
+        <p className="text-sm font-semibold text-slate-600 mb-2 mt-4">Sinh viên 1</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">MSSV</label>
+            <input type="text" value={form.student1_id} onChange={e => handleChange('student1_id', e.target.value)} disabled={loading}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
           </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Họ tên</label>
+            <input type="text" value={form.student1_name} onChange={e => handleChange('student1_name', e.target.value)} disabled={loading}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Lớp</label>
+            <input type="text" value={form.student1_class} onChange={e => handleChange('student1_class', e.target.value)} disabled={loading}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+          </div>
+          <div>
+            <label className="block text-xs text-slate-500 mb-1">Email</label>
+            <input type="email" value={form.student1_email} onChange={e => handleChange('student1_email', e.target.value)} disabled={loading}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+          </div>
+        </div>
 
-          {/* SV 2 */}
-          {isHaiSV && (
-            <>
-              <p className="text-sm font-semibold text-slate-600 mb-2">Sinh viên 2</p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">MSSV</label>
-                  <input type="text" value={form.student2_id} onChange={e => handleChange('student2_id', e.target.value)} disabled={loading}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Họ tên</label>
-                  <input type="text" value={form.student2_name} onChange={e => handleChange('student2_name', e.target.value)} disabled={loading}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Lớp</label>
-                  <input type="text" value={form.student2_class} onChange={e => handleChange('student2_class', e.target.value)} disabled={loading}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-                </div>
-                <div>
-                  <label className="block text-xs text-slate-500 mb-1">Email</label>
-                  <input type="email" value={form.student2_email} onChange={e => handleChange('student2_email', e.target.value)} disabled={loading}
-                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-                </div>
+        {/* SV 2 */}
+        {isHaiSV && (
+          <>
+            <p className="text-sm font-semibold text-slate-600 mb-2">Sinh viên 2</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">MSSV</label>
+                <input type="text" value={form.student2_id} onChange={e => handleChange('student2_id', e.target.value)} disabled={loading}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
               </div>
-            </>
-          )}
-
-          {/* GVHD, GVPB, Note, Status */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Mã GVHD</label>
-              <input type="text" value={form.gvhd_code} onChange={e => handleChange('gvhd_code', e.target.value)} disabled={loading}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Họ tên</label>
+                <input type="text" value={form.student2_name} onChange={e => handleChange('student2_name', e.target.value)} disabled={loading}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Lớp</label>
+                <input type="text" value={form.student2_class} onChange={e => handleChange('student2_class', e.target.value)} disabled={loading}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+              </div>
+              <div>
+                <label className="block text-xs text-slate-500 mb-1">Email</label>
+                <input type="email" value={form.student2_email} onChange={e => handleChange('student2_email', e.target.value)} disabled={loading}
+                  className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1">Mã GVPB</label>
-              <input type="text" value={form.gvpb_code} onChange={e => handleChange('gvpb_code', e.target.value)} disabled={loading}
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Ghi chú</label>
-            <textarea rows={2} value={form.note} onChange={e => handleChange('note', e.target.value)} disabled={loading}
-              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Trạng thái</label>
-            <select value={form.status} onChange={e => handleChange('status', e.target.value)} disabled={loading}
-              className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm bg-white disabled:opacity-50">
-              <option value="cho_duyet">Chờ duyệt</option>
-              <option value="da_duyet">Đã duyệt</option>
-              <option value="tu_choi">Từ chối</option>
-            </select>
-          </div>
+          </>
+        )}
 
-          <div className="flex justify-end gap-3 mt-6">
-            <button type="button" onClick={onClose} className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm rounded-lg">Hủy</button>
-            <button type="submit" disabled={loading}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-              {loading ? 'Đang lưu...' : 'Lưu'}
-            </button>
+        {/* GVHD, GVPB, Note, Status */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Mã GVHD</label>
+            <input type="text" value={form.gvhd_code} onChange={e => handleChange('gvhd_code', e.target.value)} disabled={loading}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
           </div>
-        </form>
-      </div>
-    </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-1">Mã GVPB</label>
+            <input type="text" value={form.gvpb_code} onChange={e => handleChange('gvpb_code', e.target.value)} disabled={loading}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+          </div>
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Ghi chú</label>
+          <textarea rows={2} value={form.note} onChange={e => handleChange('note', e.target.value)} disabled={loading}
+            className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Trạng thái</label>
+          <select value={form.status} onChange={e => handleChange('status', e.target.value)} disabled={loading}
+            className="w-full border border-slate-200 rounded-lg px-3 py-3 text-sm bg-white disabled:opacity-50">
+            <option value="cho_duyet">Chờ duyệt</option>
+            <option value="da_duyet">Đã duyệt</option>
+            <option value="tu_choi">Từ chối</option>
+          </select>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-6">
+          <button type="button" onClick={onClose} className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm rounded-lg">Hủy</button>
+          <button type="submit" disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+            {loading ? 'Đang lưu...' : 'Lưu'}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }

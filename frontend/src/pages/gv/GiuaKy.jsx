@@ -2,8 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDeTais } from '../../services/deTaiService';
 import { chamDiemGK } from '../../services/giuaKyService';
-
-
+import Modal from '../../components/common/Modal';
 
 export default function GVHDGiuaKyPage() {
   const queryClient = useQueryClient();
@@ -138,73 +137,70 @@ export default function GVHDGiuaKyPage() {
         </table>
       </div>
       {showEditModal && editDeTai && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-1">Nhập điểm giữa kỳ</h2>
-            <p className="text-sm text-slate-500 mb-4">{editDeTai.tenDeTai}</p>
-            {Array.isArray(editDeTai.sinh_viens) && editDeTai.sinh_viens.length > 0 && (
-              <div className="mb-4 bg-slate-50 rounded p-3">
-                <p className="text-xs font-medium text-slate-500 mb-1">Sinh viên</p>
-                {editDeTai.sinh_viens.map(sv => (
-                  <p key={sv.mssv} className="text-sm text-slate-700">{sv.hoTen} — {sv.mssv}</p>
-                ))}
-              </div>
-            )}
-            <div className="mb-4">
-              <label className="text-xs font-medium text-slate-600 mb-2 block">Điểm giữa kỳ (0-10)</label>
-              <input
-                type="number"
-                min="0"
-                max="10"
-                step="0.5"
-                value={editForm.tong_diem ?? ''}
-                onChange={e => setEditForm(f => ({ ...f, tong_diem: e.target.value }))}
-                className="border border-slate-300 rounded px-3 py-2 text-sm w-full max-w-[150px] focus:outline-blue-500"
-              />
-              <div className="flex items-center gap-3 mt-4">
-                <span className="text-sm text-slate-600 flex-1">Trạng thái</span>
-                {trangThaiGiuaKy && (
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${trangThaiGiuaKy === 'dat' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                    {trangThaiGiuaKy === 'dat' ? 'Đạt' : 'Không đạt'}
-                  </span>
-                )}
-              </div>
+        <Modal isOpen={true} onClose={() => setShowEditModal(false)} title="Nhập điểm giữa kỳ" maxWidth="max-w-lg">
+          <p className="text-sm text-slate-500 mb-4">{editDeTai.tenDeTai}</p>
+          {Array.isArray(editDeTai.sinh_viens) && editDeTai.sinh_viens.length > 0 && (
+            <div className="mb-4 bg-slate-50 rounded p-3">
+              <p className="text-xs font-medium text-slate-500 mb-1">Sinh viên</p>
+              {editDeTai.sinh_viens.map(sv => (
+                <p key={sv.mssv} className="text-sm text-slate-700">{sv.hoTen} — {sv.mssv}</p>
+              ))}
             </div>
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-slate-600 mb-1">Nhận xét</label>
-              <textarea
-                rows={3}
-                value={editForm.nhanXet ?? ''}
-                onChange={e => setEditForm(f => ({ ...f, nhanXet: e.target.value }))}
-                className="border border-slate-300 rounded px-2 py-1 text-sm w-full focus:outline-blue-500"
-              />
+          )}
+          <div className="mb-4">
+            <label className="text-xs font-medium text-slate-600 mb-2 block">Điểm giữa kỳ (0-10)</label>
+            <input
+              type="number"
+              min="0"
+              max="10"
+              step="0.5"
+              value={editForm.tong_diem ?? ''}
+              onChange={e => setEditForm(f => ({ ...f, tong_diem: e.target.value }))}
+              className="border border-slate-300 rounded px-3 py-2 text-sm w-full max-w-[150px] focus:outline-blue-500"
+            />
+            <div className="flex items-center gap-3 mt-4">
+              <span className="text-sm text-slate-600 flex-1">Trạng thái</span>
+              {trangThaiGiuaKy && (
+                <span className={`px-2 py-1 rounded text-xs font-medium ${trangThaiGiuaKy === 'dat' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
+                  {trangThaiGiuaKy === 'dat' ? 'Đạt' : 'Không đạt'}
+                </span>
+              )}
             </div>
-            <div className="flex gap-2 justify-end mt-4">
-              <button
-                className="px-4 py-2 rounded bg-slate-200 hover:bg-slate-300 text-sm"
-                onClick={() => setShowEditModal(false)}
-              >Hủy</button>
-              <button
-                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm disabled:opacity-60"
-                disabled={updateMut.isPending || saveSuccess}
-                onClick={() => {
-                  if (!updateMut.isPending && !saveSuccess) {
-                    updateMut.mutate({
-                      deTaiId: editDeTai?.maDeTai,
-                      data: {
-                        tong_diem: editForm.tong_diem,
-                        nhan_xet: editForm.nhanXet,
-                      },
-                    });
-                  }
-                }}
-              >
-                {saveSuccess ? 'Đã lưu!' : updateMut.isPending ? 'Đang lưu...' : 'Lưu'}
-              </button>
-            </div>
-            {updateMut.isError && <div className="text-red-500 mt-2 text-sm">Có lỗi xảy ra, vui lòng thử lại.</div>}
           </div>
-        </div>
+          <div className="mb-4">
+            <label className="block text-xs font-medium text-slate-600 mb-1">Nhận xét</label>
+            <textarea
+              rows={3}
+              value={editForm.nhanXet ?? ''}
+              onChange={e => setEditForm(f => ({ ...f, nhanXet: e.target.value }))}
+              className="border border-slate-300 rounded px-2 py-1 text-sm w-full focus:outline-blue-500"
+            />
+          </div>
+          <div className="flex gap-2 justify-end mt-4">
+            <button
+              className="px-4 py-2 rounded border border-slate-200 hover:bg-slate-50 text-sm font-medium text-slate-700"
+              onClick={() => setShowEditModal(false)}
+            >Hủy</button>
+            <button
+              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium disabled:opacity-60"
+              disabled={updateMut.isPending || saveSuccess}
+              onClick={() => {
+                if (!updateMut.isPending && !saveSuccess) {
+                  updateMut.mutate({
+                    deTaiId: editDeTai?.maDeTai,
+                    data: {
+                      tong_diem: editForm.tong_diem,
+                      nhan_xet: editForm.nhanXet,
+                    },
+                  });
+                }
+              }}
+            >
+              {saveSuccess ? 'Đã lưu!' : updateMut.isPending ? 'Đang lưu...' : 'Lưu'}
+            </button>
+          </div>
+          {updateMut.isError && <div className="text-red-500 mt-2 text-sm">Có lỗi xảy ra, vui lòng thử lại.</div>}
+        </Modal>
       )}
     </div>
   );

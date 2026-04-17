@@ -2,6 +2,9 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { HiOutlineXMark, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import { getStudents, importStudents, createStudent, updateStudent, deleteStudent } from '../../services/sinhVienService';
+import Pagination from '../../components/common/Pagination';
+import Modal from '../../components/common/Modal';
+import ConfirmModal from '../../components/common/ConfirmModal';
 
 export default function SinhVien() {
   const queryClient = useQueryClient();
@@ -110,21 +113,13 @@ export default function SinhVien() {
         </table>
       </div>
 
-      {total > perPage && (
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-sm text-slate-500">Hiển thị {start}-{end} / {total} sinh viên</span>
-          <div className="flex gap-1">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}
-              className="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50">Trước</button>
-            {[...Array(Math.ceil(total / perPage))].map((_, i) => (
-              <button key={i} onClick={() => setPage(i + 1)}
-                className={`px-3 py-1 text-sm border rounded ${page === i + 1 ? 'bg-blue-500 text-white border-blue-500' : 'border-slate-200 hover:bg-slate-50'}`}>{i + 1}</button>
-            ))}
-            <button onClick={() => setPage(p => Math.min(Math.ceil(total / perPage), p + 1))} disabled={page >= Math.ceil(total / perPage)}
-              className="px-3 py-1 text-sm border border-slate-200 rounded hover:bg-slate-50 disabled:opacity-50">Sau</button>
-          </div>
-        </div>
-      )}
+      <Pagination 
+        page={page} 
+        setPage={setPage} 
+        total={total} 
+        perPage={perPage} 
+        itemName="sinh viên" 
+      />
 
       {showImportModal && <ImportModal onClose={() => setShowImportModal(false)} />}
       {showFormModal && <SvFormModal editItem={editItem} onClose={() => { setShowFormModal(false); setEditItem(null); }} />}
@@ -151,47 +146,41 @@ function ImportModal({ onClose }) {
   });
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl p-6 max-w-lg w-full mx-4 max-h-[80vh] overflow-y-auto relative" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600" aria-label="Đóng">
-          <HiOutlineXMark size={20} />
-        </button>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Import danh sách sinh viên</h2>
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">File Excel</label>
-          <input type="file" accept=".xlsx,.xls" onChange={e => setFile(e.target.files[0] || null)}
-            className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
-        </div>
-        <button onClick={() => importMut.mutate()} disabled={!file || importMut.isPending}
-          className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-          {importMut.isPending ? 'Đang xử lý...' : 'Import'}
-        </button>
-        {importMut.isError && <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-lg mt-4">Không thể import file. Vui lòng thử lại.</div>}
-        {result && (
-          <div className="mt-4">
-            {result.imported > 0 && <div className="bg-green-50 text-green-700 text-sm px-4 py-3 rounded-lg">Đã import {result.imported} sinh viên thành công.</div>}
-            {result.errors?.length > 0 && (
-              <div className="mt-3 border border-amber-200 rounded-lg overflow-hidden">
-                <table className="w-full">
-                  <thead><tr className="bg-amber-50">
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Dòng</th>
-                    <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Lỗi</th>
-                  </tr></thead>
-                  <tbody>
-                    {result.errors.map((err, i) => (
-                      <tr key={i} className="border-t border-amber-100">
-                        <td className="px-3 py-2 text-sm text-slate-700">{err.row}</td>
-                        <td className="px-3 py-2 text-sm text-slate-700">{err.message}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
+    <Modal isOpen={true} onClose={onClose} title="Import danh sách sinh viên" maxWidth="max-w-lg">
+      <div className="mb-4">
+        <label className="block text-sm font-semibold text-slate-700 mb-1">File Excel</label>
+        <input type="file" accept=".xlsx,.xls" onChange={e => setFile(e.target.files[0] || null)}
+          className="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100" />
       </div>
-    </div>
+      <button onClick={() => importMut.mutate()} disabled={!file || importMut.isPending}
+        className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+        {importMut.isPending ? 'Đang xử lý...' : 'Import'}
+      </button>
+      {importMut.isError && <div className="bg-red-50 text-red-700 text-sm px-4 py-3 rounded-lg mt-4">Không thể import file. Vui lòng thử lại.</div>}
+      {result && (
+        <div className="mt-4">
+          {result.imported > 0 && <div className="bg-green-50 text-green-700 text-sm px-4 py-3 rounded-lg">Đã import {result.imported} sinh viên thành công.</div>}
+          {result.errors?.length > 0 && (
+            <div className="mt-3 border border-amber-200 rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead><tr className="bg-amber-50">
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Dòng</th>
+                  <th className="px-3 py-2 text-left text-xs font-semibold text-amber-700">Lỗi</th>
+                </tr></thead>
+                <tbody>
+                  {result.errors.map((err, i) => (
+                    <tr key={i} className="border-t border-amber-100">
+                      <td className="px-3 py-2 text-sm text-slate-700">{err.row}</td>
+                      <td className="px-3 py-2 text-sm text-slate-700">{err.message}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+    </Modal>
   );
 }
 
@@ -232,64 +221,53 @@ function SvFormModal({ editItem, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onClose}>
-      <div className="bg-white rounded-xl p-6 max-w-md w-full mx-4 relative" onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-600" aria-label="Đóng">
-          <HiOutlineXMark size={20} />
-        </button>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">{editItem ? 'Sửa sinh viên' : 'Thêm sinh viên'}</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">MSSV</label>
-            <input type="text" value={form.mssv} onChange={e => handleChange('mssv', e.target.value)} disabled={!!editItem || loading}
-              className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.mssv ? 'border-red-300' : 'border-slate-200'}`} />
-            {errors.mssv && <p className="text-red-500 text-xs mt-1">{errors.mssv[0]}</p>}
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Họ tên</label>
-            <input type="text" value={form.hoTen} onChange={e => handleChange('hoTen', e.target.value)} disabled={loading}
-              className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.hoTen ? 'border-red-300' : 'border-slate-200'}`} />
-            {errors.hoTen && <p className="text-red-500 text-xs mt-1">{errors.hoTen[0]}</p>}
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Lớp</label>
-            <input type="text" value={form.lop} onChange={e => handleChange('lop', e.target.value)} disabled={loading}
-              className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-          </div>
-          <div className="mb-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Email</label>
-            <input type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} disabled={loading}
-              className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.email ? 'border-red-300' : 'border-slate-200'}`} />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email[0]}</p>}
-          </div>
-          <div className="flex justify-end gap-3 mt-6">
-            <button type="button" onClick={onClose} className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm rounded-lg">Hủy</button>
-            <button type="submit" disabled={loading}
-              className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-              {loading ? 'Đang lưu...' : 'Lưu'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Modal isOpen={true} onClose={onClose} title={editItem ? 'Sửa sinh viên' : 'Thêm sinh viên'} maxWidth="max-w-md">
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">MSSV</label>
+          <input type="text" value={form.mssv} onChange={e => handleChange('mssv', e.target.value)} disabled={!!editItem || loading}
+            className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.mssv ? 'border-red-300' : 'border-slate-200'}`} />
+          {errors.mssv && <p className="text-red-500 text-xs mt-1">{errors.mssv[0]}</p>}
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Họ tên</label>
+          <input type="text" value={form.hoTen} onChange={e => handleChange('hoTen', e.target.value)} disabled={loading}
+            className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.hoTen ? 'border-red-300' : 'border-slate-200'}`} />
+          {errors.hoTen && <p className="text-red-500 text-xs mt-1">{errors.hoTen[0]}</p>}
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Lớp</label>
+          <input type="text" value={form.lop} onChange={e => handleChange('lop', e.target.value)} disabled={loading}
+            className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Email</label>
+          <input type="email" value={form.email} onChange={e => handleChange('email', e.target.value)} disabled={loading}
+            className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.email ? 'border-red-300' : 'border-slate-200'}`} />
+          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email[0]}</p>}
+        </div>
+        <div className="flex justify-end gap-3 mt-6">
+          <button type="button" onClick={onClose} className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm rounded-lg">Hủy</button>
+          <button type="submit" disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+            {loading ? 'Đang lưu...' : 'Lưu'}
+          </button>
+        </div>
+      </form>
+    </Modal>
   );
 }
 
 function SvDeleteConfirm({ item, loading, onConfirm, onCancel }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={onCancel}>
-      <div className="bg-white rounded-xl p-6 max-w-sm w-full mx-4 text-center" onClick={e => e.stopPropagation()}>
-        <HiOutlineExclamationTriangle className="text-red-500 mx-auto mb-3" size={40} />
-        <h3 className="text-xl font-semibold text-slate-900">Xóa sinh viên?</h3>
-        <p className="text-sm text-slate-500 mt-2">Bạn có chắc muốn xóa sinh viên {item.hoTen} ({item.mssv})? Hành động này không thể hoàn tác.</p>
-        <div className="flex justify-center gap-3 mt-6">
-          <button onClick={onCancel} className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm rounded-lg">Hủy</button>
-          <button onClick={onConfirm} disabled={loading}
-            className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-            {loading ? 'Đang xóa...' : 'Xóa'}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmModal 
+      isOpen={true}
+      title="Xóa sinh viên?"
+      message={`Bạn có chắc muốn xóa sinh viên ${item.hoTen} (${item.mssv})? Hành động này không thể hoàn tác.`}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+      loading={loading}
+      confirmText="Xóa"
+    />
   );
 }

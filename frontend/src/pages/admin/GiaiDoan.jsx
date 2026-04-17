@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { HiOutlineXMark, HiOutlineExclamationTriangle } from "react-icons/hi2";
+import Modal from "../../components/common/Modal";
+import ConfirmModal from "../../components/common/ConfirmModal";
 import {
   getStages,
   createStage,
@@ -300,232 +301,190 @@ export default function AdminGiaiDoanPage() {
 
       {/* Modal sửa giai đoạn */}
       {showFormModal && editItem && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-xl p-6 max-w-lg w-full mx-auto shadow-xl">
-            <h3 className="text-xl font-bold text-slate-900 mb-4">
-              Sửa giai đoạn
-            </h3>
-            <div className="space-y-4">
-              <div>
+        <Modal
+          isOpen={true}
+          onClose={() => {
+            setShowFormModal(false);
+            setEditItem(null);
+          }}
+          title="Sửa giai đoạn"
+          maxWidth="max-w-lg"
+        >
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Mô tả
+              </label>
+              <input
+                type="text"
+                value={formMoTa}
+                onChange={(e) => setFormMoTa(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                placeholder="Nhập mô tả giai đoạn"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Loại
+              </label>
+              <select
+                value={formLoai}
+                onChange={(e) => setFormLoai(e.target.value)}
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+              >
+                <option value="">-- Chọn loại --</option>
+                <option value="deadline">Deadline</option>
+                <option value="process">Process</option>
+                <option value="milestone">Milestone</option>
+              </select>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Mô tả
+                  Ngày bắt đầu
                 </label>
                 <input
-                  type="text"
-                  value={formMoTa}
-                  onChange={(e) => setFormMoTa(e.target.value)}
+                  type="date"
+                  value={formNgayBatDau}
+                  onChange={(e) => setFormNgayBatDau(e.target.value)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="Nhập mô tả giai đoạn"
                 />
               </div>
-              <div>
+              <div className="flex-1">
                 <label className="block text-sm font-medium text-slate-700 mb-1">
-                  Loại
+                  Ngày kết thúc
                 </label>
-                <select
-                  value={formLoai}
-                  onChange={(e) => setFormLoai(e.target.value)}
+                <input
+                  type="date"
+                  value={formNgayKetThuc}
+                  onChange={(e) => setFormNgayKetThuc(e.target.value)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                >
-                  <option value="">-- Chọn loại --</option>
-                  <option value="deadline">Deadline</option>
-                  <option value="process">Process</option>
-                  <option value="milestone">Milestone</option>
-                </select>
+                />
               </div>
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Ngày bắt đầu
-                  </label>
-                  <input
-                    type="date"
-                    value={formNgayBatDau}
-                    onChange={(e) => setFormNgayBatDau(e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Ngày kết thúc
-                  </label>
-                  <input
-                    type="date"
-                    value={formNgayKetThuc}
-                    onChange={(e) => setFormNgayKetThuc(e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                  />
-                </div>
-              </div>
-
-              {/* <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Data
-                  </label>
-                  <textarea
-                    value={formData}
-                    onChange={(e) => setFormData(e.target.value)}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                    placeholder="Nhập dữ liệu giai đoạn"
-                    rows="4"
-                  />
-                </div>
-              </div> */}
-
-              <div className="gap-4">
-                <p className="block text-sm font-medium text-slate-700 mb-1">
-                  Chức năng cho phép:
-                </p>
-                <label className="flex block text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                    checked={formData.con_phancong_hd}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        con_phancong_hd: e.target.checked,
-                      })
-                    }
-                  />
-                  Còn phân công gvhd
-                </label>
-
-                <label className="flex block text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                    checked={formData.con_phancong_pb}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        con_phancong_pb: e.target.checked,
-                      })
-                    }
-                  />
-                  Còn phân công gvpb
-                </label>
-
-                <label className="flex block text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                    checked={formData.con_dangky}
-                    onChange={(e) =>
-                      setFormData({ ...formData, con_dangky: e.target.checked })
-                    }
-                  />
-                  Còn đăng ký
-                </label>
-
-                <label className="flex block text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                    checked={formData.con_chamGK}
-                    onChange={(e) =>
-                      setFormData({ ...formData, con_chamGK: e.target.checked })
-                    }
-                  />
-                  Còn chấm điểm giữa kỳ
-                </label>
-
-                <label className="flex block text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                    checked={formData.con_chamPB}
-                    onChange={(e) =>
-                      setFormData({ ...formData, con_chamPB: e.target.checked })
-                    }
-                  />
-                  Còn chấm điểm phản biện
-                </label>
-
-                <label className="flex block text-sm font-medium text-slate-700">
-                  <input
-                    type="checkbox"
-                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                    checked={formData.con_chamHD}
-                    onChange={(e) =>
-                      setFormData({ ...formData, con_chamHD: e.target.checked })
-                    }
-                  />
-                  Còn chấm điểm hội đồng
-                </label>
-              </div>
-
-              {formError && (
-                <div className="text-red-500 text-sm mt-2">{formError}</div>
-              )}
             </div>
-            <div className="flex justify-end gap-3 mt-8">
-              <button
-                onClick={() => {
-                  setShowFormModal(false);
-                  setEditItem(null);
-                }}
-                className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={updateMut.isPending}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition-colors disabled:opacity-50"
-              >
-                {updateMut.isPending ? "Đang lưu..." : "Lưu thay đổi"}
-              </button>
+
+            <div className="gap-4">
+              <p className="block text-sm font-medium text-slate-700 mb-1">
+                Chức năng cho phép:
+              </p>
+              <label className="flex block text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                  checked={formData.con_phancong_hd}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      con_phancong_hd: e.target.checked,
+                    })
+                  }
+                />
+                Còn phân công gvhd
+              </label>
+
+              <label className="flex block text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                  checked={formData.con_phancong_pb}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      con_phancong_pb: e.target.checked,
+                    })
+                  }
+                />
+                Còn phân công gvpb
+              </label>
+
+              <label className="flex block text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                  checked={formData.con_dangky}
+                  onChange={(e) =>
+                    setFormData({ ...formData, con_dangky: e.target.checked })
+                  }
+                />
+                Còn đăng ký
+              </label>
+
+              <label className="flex block text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                  checked={formData.con_chamGK}
+                  onChange={(e) =>
+                    setFormData({ ...formData, con_chamGK: e.target.checked })
+                  }
+                />
+                Còn chấm điểm giữa kỳ
+              </label>
+
+              <label className="flex block text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                  checked={formData.con_chamPB}
+                  onChange={(e) =>
+                    setFormData({ ...formData, con_chamPB: e.target.checked })
+                  }
+                />
+                Còn chấm điểm phản biện
+              </label>
+
+              <label className="flex block text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                  checked={formData.con_chamHD}
+                  onChange={(e) =>
+                    setFormData({ ...formData, con_chamHD: e.target.checked })
+                  }
+                />
+                Còn chấm điểm hội đồng
+              </label>
             </div>
+
+            {formError && (
+              <div className="text-red-500 text-sm mt-2">{formError}</div>
+            )}
           </div>
-        </div>
+          <div className="flex justify-end gap-3 mt-8">
+            <button
+              onClick={() => {
+                setShowFormModal(false);
+                setEditItem(null);
+              }}
+              className="px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 rounded-lg transition-colors border border-slate-200"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={updateMut.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm font-medium rounded-lg shadow-sm transition-colors disabled:opacity-50"
+            >
+              {updateMut.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+            </button>
+          </div>
+        </Modal>
       )}
 
       {/* Modal xoá giữ nguyên */}
       {showDeleteConfirm && deleteItem && (
-        <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-          onClick={() => {
+        <ConfirmModal
+          isOpen={true}
+          title="Xóa giai đoạn?"
+          message={`Bạn có chắc muốn xóa giai đoạn này? Hành động này không thể hoàn tác.`}
+          onConfirm={() => deleteMut.mutate(deleteItem.id)}
+          onCancel={() => {
             setShowDeleteConfirm(false);
             setDeleteItem(null);
           }}
-        >
-          <div
-            className="bg-white rounded-xl p-6 max-w-sm w-full mx-4 text-center"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <HiOutlineExclamationTriangle
-              className="text-red-500 mx-auto mb-3"
-              size={40}
-            />
-            <h3 className="text-xl font-semibold text-slate-900">
-              Xóa giai đoạn?
-            </h3>
-            <p className="text-sm text-slate-500 mt-2">
-              Bạn có chắc muốn xóa giai đoạn này? Hành động này không thể hoàn
-              tác.
-            </p>
-            <div className="flex justify-center gap-3 mt-6">
-              <button
-                onClick={() => {
-                  setShowDeleteConfirm(false);
-                  setDeleteItem(null);
-                }}
-                className="border border-slate-200 text-slate-700 hover:bg-slate-50 px-4 py-2 text-sm rounded-lg"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => deleteMut.mutate(deleteItem.id)}
-                disabled={deleteMut.isPending}
-                className="bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-              >
-                {deleteMut.isPending ? "Đang xóa..." : "Xóa"}
-              </button>
-            </div>
-          </div>
-        </div>
+          loading={deleteMut.isPending}
+          confirmText="Xóa"
+        />
       )}
     </div>
   );

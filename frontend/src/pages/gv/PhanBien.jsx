@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getDeTais, chamDiemPB } from '../../services/deTaiService';
+import Modal from '../../components/common/Modal';
 
 export default function GVPBPhanBienPage() {
   const queryClient = useQueryClient();
@@ -126,69 +127,66 @@ export default function GVPBPhanBienPage() {
       </div>
       
       {showEditModal && editDeTai && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-30 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <h2 className="text-lg font-semibold mb-1">Phiếu chấm Phản biện</h2>
-            <p className="text-sm text-slate-500 mb-4">{editDeTai.tenDeTai}</p>
-            {Array.isArray(editDeTai.sinh_viens) && editDeTai.sinh_viens.length > 0 && (
-              <div className="mb-4 bg-slate-50 rounded p-3 border border-slate-100">
-                <p className="text-xs font-bold text-slate-500 mb-2 uppercase">Sinh viên thực hiện:</p>
-                {editDeTai.sinh_viens.map(sv => (
-                  <p key={sv.mssv} className="text-sm text-slate-700 mb-1 font-medium">{sv.hoTen} — {sv.mssv}</p>
-                ))}
-              </div>
-            )}
-            
-            <div className="mb-4">
-              <label className="text-xs font-bold text-slate-600 mb-2 block uppercase">Điểm Phản biện (0-10)</label>
-              <input
-                type="number"
-                min="0"
-                max="10"
-                step="0.5"
-                value={editForm.tong_diem ?? ''}
-                onChange={e => setEditForm(f => ({ ...f, tong_diem: e.target.value }))}
-                className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full max-w-[150px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+        <Modal isOpen={true} onClose={() => setShowEditModal(false)} title="Phiếu chấm Phản biện" maxWidth="max-w-lg">
+          <p className="text-sm text-slate-500 mb-4">{editDeTai.tenDeTai}</p>
+          {Array.isArray(editDeTai.sinh_viens) && editDeTai.sinh_viens.length > 0 && (
+            <div className="mb-4 bg-slate-50 rounded p-3 border border-slate-100">
+              <p className="text-xs font-bold text-slate-500 mb-2 uppercase">Sinh viên thực hiện:</p>
+              {editDeTai.sinh_viens.map(sv => (
+                <p key={sv.mssv} className="text-sm text-slate-700 mb-1 font-medium">{sv.hoTen} — {sv.mssv}</p>
+              ))}
             </div>
-            
-            <div className="mb-6">
-              <label className="block text-xs font-bold text-slate-600 mb-2 uppercase">Nhận xét của Cán bộ Phản biện</label>
-              <textarea
-                rows={4}
-                value={editForm.nhanXet ?? ''}
-                placeholder="Nhập đánh giá và nhận xét của bạn..."
-                onChange={e => setEditForm(f => ({ ...f, nhanXet: e.target.value }))}
-                className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-slate-100">
-              <button
-                className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm transition-colors"
-                onClick={() => setShowEditModal(false)}
-              >Hủy bỏ</button>
-              <button
-                className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 text-sm disabled:opacity-60 transition-colors"
-                disabled={updateMut.isPending || saveSuccess}
-                onClick={() => {
-                  if (!updateMut.isPending && !saveSuccess) {
-                    updateMut.mutate({
-                      deTaiId: editDeTai?.maDeTai,
-                      data: {
-                        diemPhanBien: editForm.tong_diem,
-                        nhanXetPhanBien: editForm.nhanXet,
-                      },
-                    });
-                  }
-                }}
-              >
-                {saveSuccess ? 'Đã lưu thành công!' : updateMut.isPending ? 'Đang lưu...' : 'Hoàn tất chấm điểm'}
-              </button>
-            </div>
-            {updateMut.isError && <div className="text-red-500 mt-3 text-sm text-center">Có lỗi xảy ra, vui lòng kiểm tra lại.</div>}
+          )}
+          
+          <div className="mb-4">
+            <label className="text-xs font-bold text-slate-600 mb-2 block uppercase">Điểm Phản biện (0-10)</label>
+            <input
+              type="number"
+              min="0"
+              max="10"
+              step="0.5"
+              value={editForm.tong_diem ?? ''}
+              onChange={e => setEditForm(f => ({ ...f, tong_diem: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full max-w-[150px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
           </div>
-        </div>
+          
+          <div className="mb-6">
+            <label className="block text-xs font-bold text-slate-600 mb-2 uppercase">Nhận xét của Cán bộ Phản biện</label>
+            <textarea
+              rows={4}
+              value={editForm.nhanXet ?? ''}
+              placeholder="Nhập đánh giá và nhận xét của bạn..."
+              onChange={e => setEditForm(f => ({ ...f, nhanXet: e.target.value }))}
+              className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-slate-100">
+            <button
+              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm transition-colors"
+              onClick={() => setShowEditModal(false)}
+            >Hủy bỏ</button>
+            <button
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 text-sm disabled:opacity-60 transition-colors"
+              disabled={updateMut.isPending || saveSuccess}
+              onClick={() => {
+                if (!updateMut.isPending && !saveSuccess) {
+                  updateMut.mutate({
+                    deTaiId: editDeTai?.maDeTai,
+                    data: {
+                      diemPhanBien: editForm.tong_diem,
+                      nhanXetPhanBien: editForm.nhanXet,
+                    },
+                  });
+                }
+              }}
+            >
+              {saveSuccess ? 'Đã lưu thành công!' : updateMut.isPending ? 'Đang lưu...' : 'Hoàn tất chấm điểm'}
+            </button>
+          </div>
+          {updateMut.isError && <div className="text-red-500 mt-3 text-sm text-center">Có lỗi xảy ra, vui lòng kiểm tra lại.</div>}
+        </Modal>
       )}
     </div>
   );

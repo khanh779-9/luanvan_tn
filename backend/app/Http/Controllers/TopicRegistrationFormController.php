@@ -12,18 +12,29 @@ use App\Models\GiangVien;
 
 class TopicRegistrationFormController extends Controller
 {
+    
+    public function my(Request $request)
+    {
+        $user = $request->user();
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+        $mssv = $user->mssv ?? $user->id;
+        $topic = TopicRegistrationForm::where('student1_id', $mssv)
+            ->orWhere('student2_id', $mssv)
+            ->orderByDesc('registered_at')
+            ->first();
+        return response()->json(['data' => $topic]);
+    }
 
-    /**
-     * Duyệt bản đăng ký đề tài và tạo bản ghi vào bảng detai
-     */
+     
     public function approve($id)
     {
         $form = TopicRegistrationForm::findOrFail($id);
         if ($form->status === 'da_duyet') {
             return response()->json(['message' => 'Bản đăng ký đã được duyệt trước đó!'], 400);
         }
-
-        // Tạo đề tài mới
+ 
         $deTai = \App\Models\DeTai::create([
             'tenDeTai' => $form->topic_title,
             'moTa' => $form->topic_description,
@@ -42,7 +53,7 @@ class TopicRegistrationFormController extends Controller
             'diemTongKet' => null,
         ]);
 
-        // Cập nhật trạng thái
+       
         $form->status = 'da_duyet';
         $form->save();
 
