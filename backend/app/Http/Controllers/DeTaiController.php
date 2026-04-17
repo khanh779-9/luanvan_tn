@@ -75,6 +75,7 @@ class DeTaiController extends Controller
             'maGV_PB' => 'nullable|string|max:20',
             'maHoiDong' => 'nullable|integer',
             'trangThai' => 'nullable|string|max:50',
+            'data_json' => 'nullable|array',
         ]);
         $detai = DeTai::create($validated);
         return response()->json($detai, 201);
@@ -94,6 +95,7 @@ class DeTaiController extends Controller
             'diemGiuaKy' => 'nullable|numeric',
             'nhanXetGiuaKy' => 'nullable|string',
             'trangThaiGiuaKy' => 'nullable|string',
+            'data_json' => 'nullable|array',
         ]);
         $detai->update($validated);
         return response()->json($detai);
@@ -113,24 +115,25 @@ class DeTaiController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        if ($request->has('tieu_chi')) {
-            $request->validate([
-                'tieu_chi' => 'required|array',
-                'tieu_chi.*' => 'numeric|min:0|max:10',
-                'tong_diem' => 'required|numeric|min:0|max:10',
-                'nhan_xet' => 'nullable|string',
-            ]);
-            $detai->diemHuongDan = $request->tong_diem;
-            $detai->nhanXetHuongDan = $request->nhan_xet;
-            $detai->save();
-        } else {
-            $validated = $request->validate([
-                'diemHuongDan' => 'nullable|numeric|min:0|max:10',
-                'nhanXetHuongDan' => 'nullable|string',
-            ]);
-            $detai->update($validated);
-        }
-
+        // Cho phép cập nhật data_json khi chấm điểm
+        $validated = $request->validate([
+            'diemHuongDan' => 'nullable|numeric|min:0|max:10',
+            'nhanXetHuongDan' => 'nullable|string',
+            'uuDiem' => 'nullable|string',
+            'thieuSot' => 'nullable|string',
+            'ndDieuChinh' => 'nullable|string',
+            'cauHoi' => 'nullable|string',
+            'thuyetMinh' => 'nullable|string',
+            'diemPhanTich' => 'nullable|array',
+            'diemThietKe' => 'nullable|array',
+            'diemHienThuc' => 'nullable|array',
+            'diemBaoCao' => 'nullable|array',
+            'diemTongCong' => 'nullable|array',
+            'diemFinal' => 'nullable|array',
+            'deNghi' => 'nullable|array',
+            'data_json' => 'nullable|array',
+        ]);
+        $detai->update($validated);
         return response()->json($detai);
     }
 

@@ -15,7 +15,8 @@ class DeTai extends Model
         'diemHuongDan', 'nhanXetHuongDan',
         'diemPhanBien', 'nhanXetPhanBien',
         'diemHoiDong', 'diemTongKet', 'diemChu', 'trangThai',
-        'thuTuTrongHD', 'ghiChu',
+        'thuTuTrongHD', 'ghiChu', 'created_at', 'updated_at',
+        'data_json',
     ];
 
     protected $casts = [
@@ -24,6 +25,7 @@ class DeTai extends Model
         'diemPhanBien' => 'float',
         'diemHoiDong' => 'float',
         'diemTongKet' => 'float',
+        'data_json' => 'array',
     ];
 
     public function giangVienHD()

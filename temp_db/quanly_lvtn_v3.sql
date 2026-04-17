@@ -91,6 +91,10 @@ CREATE TABLE detai (
   FOREIGN KEY (`maHoiDong`) REFERENCES hoidong(`maHoiDong`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+alter table detai 
+add column data_json TEXT NULL DEFAULT ('{ "tong_diem": "", "nhanXet": "", "uuDiem": "", "thieuSot": "", "ndDieuChinh": "", "cauHoi": "", "thuyetMinh": "", "sinh_viens": [ { "mssv": "", "hoTen": "", "lop": "", "diemPhanTich": "", "diemThietKe": "", "diemHienThuc": "", "diemBaoCao": "", "diemTongCong": "", "diemFinal": "", "deNghi": "" }]}')
+
+
 INSERT INTO detai VALUES
 (1,'Hệ thống quản lý sinh viên','Xây dựng hệ thống quản lý','GV001','GV002',1,8.5,9,8,8.5,8.5,NULL,'duoc_lam_tiep','dat','Tốt','Tốt','OK',NULL,NULL,NOW(),NOW()),
 (2,'Website bán hàng','Website thương mại','GV003','GV004',1,7,7.5,7,7.2,7.2,NULL,'canh_cao','can_chinh_sua','Cần sửa','UI yếu','Chi tiết',NULL,NULL,NOW(),NOW()),

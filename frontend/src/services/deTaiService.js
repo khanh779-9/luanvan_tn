@@ -19,7 +19,12 @@ export async function deleteDeTai(id) {
 
 // Chấm điểm hướng dẫn
 export async function chamDiemHD(id, data) {
-  return (await api.put(`/de-tai/${id}/cham-diem-hd`, data)).data;
+  // Đảm bảo gửi data_json nếu có
+  const payload = { ...data };
+  if (data.data_json) {
+    payload.data_json = data.data_json;
+  }
+  return (await api.put(`/de-tai/${id}/cham-diem-hd`, payload)).data;
 }
 
 // Chấm điểm phản biện
