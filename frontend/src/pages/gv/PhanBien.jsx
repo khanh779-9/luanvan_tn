@@ -6,7 +6,22 @@ import Modal from '../../components/common/Modal';
 export default function GVPBPhanBienPage() {
   const queryClient = useQueryClient();
   const [editDeTai, setEditDeTai] = useState(null);
-  const [editForm, setEditForm] = useState({});
+  const [editForm, setEditForm] = useState({
+    tong_diem: '',
+    nhanXet: '',
+    uuDiem: '',
+    thieuSot: '',
+    ndDieuChinh: '',
+    cauHoi: '',
+    thuyetMinh: '',
+    diemPhanTich: ['', ''],
+    diemThietKe: ['', ''],
+    diemHienThuc: ['', ''],
+    diemBaoCao: ['', ''],
+    diemTongCong: ['', ''],
+    diemFinal: ['', ''],
+    deNghi: ['', ''],
+  });
   const [showEditModal, setShowEditModal] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [search, setSearch] = useState('');
@@ -45,9 +60,25 @@ export default function GVPBPhanBienPage() {
 
   function openEdit(deTai) {
     setEditDeTai(deTai);
-    let nhanXet = deTai.nhanXetPhanBien ?? '';
-    let tong = deTai.diemPhanBien ?? 0;
-    setEditForm({ tong_diem: tong, nhanXet });
+    // Nếu có data_json.gvpb thì fill vào form, không thì lấy từ các trường cũ
+    const gvpb = deTai.data_json && deTai.data_json.gvpb ? deTai.data_json.gvpb : {};
+    setEditForm(f => ({
+      ...f,
+      tong_diem: gvpb.tong_diem ?? deTai.diemPhanBien ?? '',
+      nhanXet: gvpb.nhanXet ?? deTai.nhanXetPhanBien ?? '',
+      uuDiem: gvpb.uuDiem ?? deTai.uuDiem ?? '',
+      thieuSot: gvpb.thieuSot ?? deTai.thieuSot ?? '',
+      ndDieuChinh: gvpb.ndDieuChinh ?? deTai.ndDieuChinh ?? '',
+      cauHoi: gvpb.cauHoi ?? deTai.cauHoi ?? '',
+      thuyetMinh: gvpb.thuyetMinh ?? deTai.thuyetMinh ?? '',
+      diemPhanTich: Array.isArray(gvpb.sinh_viens) ? gvpb.sinh_viens.map(sv => sv.diemPhanTich ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemPhanTich ?? '') : ['']),
+      diemThietKe: Array.isArray(gvpb.sinh_viens) ? gvpb.sinh_viens.map(sv => sv.diemThietKe ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemThietKe ?? '') : ['']),
+      diemHienThuc: Array.isArray(gvpb.sinh_viens) ? gvpb.sinh_viens.map(sv => sv.diemHienThuc ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemHienThuc ?? '') : ['']),
+      diemBaoCao: Array.isArray(gvpb.sinh_viens) ? gvpb.sinh_viens.map(sv => sv.diemBaoCao ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemBaoCao ?? '') : ['']),
+      diemTongCong: Array.isArray(gvpb.sinh_viens) ? gvpb.sinh_viens.map(sv => sv.diemTongCong ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemTongCong ?? '') : ['']),
+      diemFinal: Array.isArray(gvpb.sinh_viens) ? gvpb.sinh_viens.map(sv => sv.diemFinal ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.diemFinal ?? '') : ['']),
+      deNghi: Array.isArray(gvpb.sinh_viens) ? gvpb.sinh_viens.map(sv => sv.deNghi ?? '') : (Array.isArray(deTai.sinh_viens) ? deTai.sinh_viens.map(sv => sv.deNghi ?? '') : ['']),
+    }));
     setSaveSuccess(false);
     setShowEditModal(true);
   }
@@ -127,48 +158,123 @@ export default function GVPBPhanBienPage() {
       </div>
       
       {showEditModal && editDeTai && (
-        <Modal isOpen={true} onClose={() => setShowEditModal(false)} title="Phiếu chấm Phản biện" maxWidth="max-w-lg">
-          <p className="text-sm text-slate-500 mb-4">{editDeTai.tenDeTai}</p>
-          {Array.isArray(editDeTai.sinh_viens) && editDeTai.sinh_viens.length > 0 && (
-            <div className="mb-4 bg-slate-50 rounded p-3 border border-slate-100">
-              <p className="text-xs font-bold text-slate-500 mb-2 uppercase">Sinh viên thực hiện:</p>
-              {editDeTai.sinh_viens.map(sv => (
-                <p key={sv.mssv} className="text-sm text-slate-700 mb-1 font-medium">{sv.hoTen} — {sv.mssv}</p>
-              ))}
+        <Modal isOpen={true} onClose={() => setShowEditModal(false)} title="Phiếu chấm Phản biện" maxWidth="max-w-2xl">
+          <div className="max-h-[70vh] overflow-y-auto pr-0">
+            <div className="mb-4 p-2 rounded border border-slate-200">
+              <span className="text-xs font-semibold text-slate-600 uppercase">Tên đề tài</span>
+              <p className="text-sm font-semibold text-slate-800 mt-1">{editDeTai.tenDeTai}</p>
             </div>
-          )}
-          
-          <div className="mb-4">
-            <label className="text-xs font-bold text-slate-600 mb-2 block uppercase">Điểm Phản biện (0-10)</label>
-            <input
-              type="number"
-              min="0"
-              max="10"
-              step="0.5"
-              value={editForm.tong_diem ?? ''}
-              onChange={e => setEditForm(f => ({ ...f, tong_diem: e.target.value }))}
-              className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full max-w-[150px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+
+            {Array.isArray(editDeTai.sinh_viens) && editDeTai.sinh_viens.length > 0 && (
+              <div className="mb-4">
+                <h3 className="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">1. Đánh giá sinh viên</h3>
+                <div className="space-y-2">
+                  {editDeTai.sinh_viens.map((sv, idx) => (
+                    <div key={sv.mssv} className="bg-white border border-slate-200 rounded p-2">
+                      <div className="flex items-center gap-2 mb-2 pb-2 border-b border-slate-100">
+                        <div className="w-6 h-6 rounded bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-xs shrink-0">
+                          {idx + 1}
+                        </div>
+                        <div>
+                          <h4 className="text-xs font-bold text-slate-800">{sv.hoTen} - ({sv.mssv})</h4>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                        <div>
+                          <label className="block text-xs font-medium text-slate-700 mb-1">Phân tích</label>
+                          <input type="number" min="0" max="10" step="0.5" className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="0.0"
+                            value={editForm.diemPhanTich[idx] ?? ''}
+                            onChange={e => setEditForm(f => { const arr = [...f.diemPhanTich]; arr[idx] = e.target.value; return { ...f, diemPhanTich: arr }; })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-700 mb-1">Thiết kế</label>
+                          <input type="number" min="0" max="10" step="0.5" className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="0.0"
+                            value={editForm.diemThietKe[idx] ?? ''}
+                            onChange={e => setEditForm(f => { const arr = [...f.diemThietKe]; arr[idx] = e.target.value; return { ...f, diemThietKe: arr }; })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-700 mb-1">Hiện thực</label>
+                          <input type="number" min="0" max="10" step="0.5" className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="0.0"
+                            value={editForm.diemHienThuc[idx] ?? ''}
+                            onChange={e => setEditForm(f => { const arr = [...f.diemHienThuc]; arr[idx] = e.target.value; return { ...f, diemHienThuc: arr }; })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-700 mb-1">Kiểm tra SP</label>
+                          <input type="number" min="0" max="10" step="0.5" className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="0.0"
+                            value={editForm.diemBaoCao[idx] ?? ''}
+                            onChange={e => setEditForm(f => { const arr = [...f.diemBaoCao]; arr[idx] = e.target.value; return { ...f, diemBaoCao: arr }; })}
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-slate-700 mb-1">Tổng cộng</label>
+                          <input type="number" min="0" max="40" step="0.5" className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 font-medium placeholder:text-slate-300" placeholder="0.0"
+                            value={editForm.diemTongCong[idx] ?? ''}
+                            onChange={e => setEditForm(f => { const arr = [...f.diemTongCong]; arr[idx] = e.target.value; return { ...f, diemTongCong: arr }; })}
+                          />
+                        </div>
+                      </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">Đề nghị hội đồng:</label>
+                        <select className="w-full md:w-auto min-w-[120px] border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400" 
+                          value={editForm.deNghi[idx] ?? ''}
+                          onChange={e => setEditForm(f => { const arr = [...f.deNghi]; arr[idx] = e.target.value; return { ...f, deNghi: arr }; })}>
+                          <option value="">-- Chọn đề nghị --</option>
+                          <option value="Được bảo vệ">Được bảo vệ</option>
+                          <option value="Không được bảo vệ">Không được bảo vệ</option>
+                          <option value="Bổ sung">Bổ sung/hiệu chỉnh để được bảo vệ</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="mb-2">
+              <h3 className="text-xs font-bold text-slate-700 mb-2 uppercase tracking-wide">2. Đánh giá chung của GVPB</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Ưu điểm chính</label>
+                  <textarea rows={2} className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="Nhập ưu điểm..." value={editForm.uuDiem} onChange={e => setEditForm(f => ({ ...f, uuDiem: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Thiếu sót chính</label>
+                  <textarea rows={2} className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="Nhập thiếu sót..." value={editForm.thieuSot} onChange={e => setEditForm(f => ({ ...f, thieuSot: e.target.value }))} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Yêu cầu điều chỉnh/bổ sung (nếu có)</label>
+                  <textarea rows={1} className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="Nhập yêu cầu..." value={editForm.ndDieuChinh} onChange={e => setEditForm(f => ({ ...f, ndDieuChinh: e.target.value }))} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Câu hỏi dành cho sinh viên</label>
+                  <textarea rows={1} className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="Nhập danh sách câu hỏi..." value={editForm.cauHoi} onChange={e => setEditForm(f => ({ ...f, cauHoi: e.target.value }))} />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Nhận xét chung</label>
+                  <textarea rows={2} className="w-full border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 placeholder:text-slate-300" placeholder="Nhập nhận xét..." value={editForm.nhanXet} onChange={e => setEditForm(f => ({ ...f, nhanXet: e.target.value }))} />
+                </div>
+                <div className="md:col-span-2 mt-2 flex flex-col md:flex-row md:items-center gap-2">
+                  <label className="text-xs font-bold text-slate-700 whitespace-nowrap">Kết luận Thuyết minh:</label>
+                  <select className="w-full md:w-32 border border-slate-200 rounded px-2 py-1 text-xs bg-white focus:outline-none focus:border-blue-400 font-medium" value={editForm.thuyetMinh} onChange={e => setEditForm(f => ({ ...f, thuyetMinh: e.target.value }))}>
+                    <option value="">-- Chọn kết quả --</option>
+                    <option value="Đạt">Đạt</option>
+                    <option value="Không đạt">Không đạt</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
-          
-          <div className="mb-6">
-            <label className="block text-xs font-bold text-slate-600 mb-2 uppercase">Nhận xét của Cán bộ Phản biện</label>
-            <textarea
-              rows={4}
-              value={editForm.nhanXet ?? ''}
-              placeholder="Nhập đánh giá và nhận xét của bạn..."
-              onChange={e => setEditForm(f => ({ ...f, nhanXet: e.target.value }))}
-              className="border border-slate-300 rounded-lg px-3 py-2 text-sm w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          
-          <div className="flex gap-3 justify-end mt-4 pt-4 border-t border-slate-100">
+
+          <div className="flex gap-2 justify-end mt-4 pt-3 border-t border-slate-200 bg-white">
             <button
-              className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-sm transition-colors"
+              className="px-3 py-1.5 rounded border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-50 transition-colors"
               onClick={() => setShowEditModal(false)}
-            >Hủy bỏ</button>
+            >Hủy</button>
             <button
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 text-sm disabled:opacity-60 transition-colors"
+              className="px-4 py-1.5 rounded bg-blue-600 text-white font-medium text-xs disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm"
               disabled={updateMut.isPending || saveSuccess}
               onClick={() => {
                 if (!updateMut.isPending && !saveSuccess) {
@@ -177,15 +283,72 @@ export default function GVPBPhanBienPage() {
                     data: {
                       diemPhanBien: editForm.tong_diem,
                       nhanXetPhanBien: editForm.nhanXet,
+                      uuDiem: editForm.uuDiem,
+                      thieuSot: editForm.thieuSot,
+                      ndDieuChinh: editForm.ndDieuChinh,
+                      cauHoi: editForm.cauHoi,
+                      thuyetMinh: editForm.thuyetMinh,
+                      diemPhanTich: editForm.diemPhanTich,
+                      diemThietKe: editForm.diemThietKe,
+                      diemHienThuc: editForm.diemHienThuc,
+                      diemBaoCao: editForm.diemBaoCao,
+                      diemTongCong: editForm.diemTongCong,
+                      diemFinal: editForm.diemFinal,
+                      deNghi: editForm.deNghi,
+                      data_json: {
+                        gvpb: {
+                          tong_diem: editForm.tong_diem,
+                          nhanXet: editForm.nhanXet,
+                          uuDiem: editForm.uuDiem,
+                          thieuSot: editForm.thieuSot,
+                          ndDieuChinh: editForm.ndDieuChinh,
+                          cauHoi: editForm.cauHoi,
+                          thuyetMinh: editForm.thuyetMinh,
+                          sinh_viens: Array.isArray(editDeTai.sinh_viens) ? editDeTai.sinh_viens.map((sv, idx) => ({
+                            mssv: sv.mssv,
+                            hoTen: sv.hoTen,
+                            lop: sv.lop ?? '',
+                            diemPhanTich: editForm.diemPhanTich[idx] ?? '',
+                            diemThietKe: editForm.diemThietKe[idx] ?? '',
+                            diemHienThuc: editForm.diemHienThuc[idx] ?? '',
+                            diemBaoCao: editForm.diemBaoCao[idx] ?? '',
+                            diemTongCong: editForm.diemTongCong[idx] ?? '',
+                            diemFinal: editForm.diemFinal[idx] ?? '',
+                            deNghi: editForm.deNghi[idx] ?? '',
+                          })) : [],
+                        },
+                        // Nếu muốn giữ nguyên dữ liệu gvhd thì lấy từ editDeTai.data_json.gvhd nếu có
+                        gvhd: (editDeTai.data_json && editDeTai.data_json.gvhd) ? editDeTai.data_json.gvhd : {
+                          tong_diem: '',
+                          nhanXet: '',
+                          uuDiem: '',
+                          thieuSot: '',
+                          ndDieuChinh: '',
+                          cauHoi: '',
+                          thuyetMinh: '',
+                          sinh_viens: Array.isArray(editDeTai.sinh_viens) ? editDeTai.sinh_viens.map(sv => ({
+                            mssv: sv.mssv,
+                            hoTen: sv.hoTen,
+                            lop: sv.lop ?? '',
+                            diemPhanTich: '',
+                            diemThietKe: '',
+                            diemHienThuc: '',
+                            diemBaoCao: '',
+                            diemTongCong: '',
+                            diemFinal: '',
+                            deNghi: '',
+                          })) : [],
+                        }
+                      },
                     },
                   });
                 }
               }}
             >
-              {saveSuccess ? 'Đã lưu thành công!' : updateMut.isPending ? 'Đang lưu...' : 'Hoàn tất chấm điểm'}
+              {saveSuccess ? 'Đã lưu!' : updateMut.isPending ? 'Đang lưu...' : 'Lưu'}
             </button>
           </div>
-          {updateMut.isError && <div className="text-red-500 mt-3 text-sm text-center">Có lỗi xảy ra, vui lòng kiểm tra lại.</div>}
+          {updateMut.isError && <div className="text-red-500 mt-3 text-xs text-center font-medium bg-white p-2 rounded border border-red-100">Cập nhật thất bại, vui lòng kiểm tra lại dữ liệu và thử lại.</div>}
         </Modal>
       )}
     </div>

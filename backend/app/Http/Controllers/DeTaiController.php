@@ -11,7 +11,7 @@ use PhpOffice\PhpWord\Settings;
 
 class DeTaiController extends Controller
 {
-    
+
     public function index(Request $request)
     {
         $query = DeTai::query();
@@ -34,7 +34,7 @@ class DeTaiController extends Controller
         $query->orderByDesc('maDeTai');
         $pageSize = $request->input('per_page', 15);
 
-        
+
 
         $result = $query->paginate($pageSize);
 
@@ -57,7 +57,7 @@ class DeTaiController extends Controller
         return response()->json($result);
     }
 
-   
+
     public function show($id)
     {
         $detai = DeTai::find($id);
@@ -65,7 +65,7 @@ class DeTaiController extends Controller
         return response()->json($detai);
     }
 
-   
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -80,7 +80,7 @@ class DeTaiController extends Controller
         $detai = DeTai::create($validated);
         return response()->json($detai, 201);
     }
- 
+
     public function update(Request $request, $id)
     {
         $detai = DeTai::find($id);
@@ -151,24 +151,25 @@ class DeTaiController extends Controller
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
-        if ($request->has('tieu_chi')) {
-            $request->validate([
-                'tieu_chi' => 'required|array',
-                'tieu_chi.*' => 'numeric|min:0|max:10',
-                'tong_diem' => 'required|numeric|min:0|max:10',
-                'nhan_xet' => 'nullable|string',
-            ]);
-            $detai->diemPhanBien = $request->tong_diem;
-            $detai->nhanXetPhanBien = $request->nhan_xet;
-            $detai->save();
-        } else {
-            $validated = $request->validate([
-                'diemPhanBien' => 'nullable|numeric|min:0|max:10',
-                'nhanXetPhanBien' => 'nullable|string',
-            ]);
-            $detai->update($validated);
-        }
-
+        // Cho phép cập nhật data_json khi chấm điểm
+        $validated = $request->validate([
+            'diemHuongDan' => 'nullable|numeric|min:0|max:10',
+            'nhanXetHuongDan' => 'nullable|string',
+            'uuDiem' => 'nullable|string',
+            'thieuSot' => 'nullable|string',
+            'ndDieuChinh' => 'nullable|string',
+            'cauHoi' => 'nullable|string',
+            'thuyetMinh' => 'nullable|string',
+            'diemPhanTich' => 'nullable|array',
+            'diemThietKe' => 'nullable|array',
+            'diemHienThuc' => 'nullable|array',
+            'diemBaoCao' => 'nullable|array',
+            'diemTongCong' => 'nullable|array',
+            'diemFinal' => 'nullable|array',
+            'deNghi' => 'nullable|array',
+            'data_json' => 'nullable|array',
+        ]);
+        $detai->update($validated);
         return response()->json($detai);
     }
 
@@ -351,12 +352,28 @@ class DeTaiController extends Controller
     private function diemSangChu($diem)
     {
         $map = [
-            0 => 'Không', 1 => 'Một', 2 => 'Hai', 3 => 'Ba', 4 => 'Bốn',
-            5 => 'Năm', 6 => 'Sáu', 7 => 'Bảy', 8 => 'Tám', 9 => 'Chín', 10 => 'Mười',
+            0 => 'Không',
+            1 => 'Một',
+            2 => 'Hai',
+            3 => 'Ba',
+            4 => 'Bốn',
+            5 => 'Năm',
+            6 => 'Sáu',
+            7 => 'Bảy',
+            8 => 'Tám',
+            9 => 'Chín',
+            10 => 'Mười',
         ];
         $decMap = [
-            1 => 'một', 2 => 'hai', 3 => 'ba', 4 => 'bốn', 5 => 'năm',
-            6 => 'sáu', 7 => 'bảy', 8 => 'tám', 9 => 'chín',
+            1 => 'một',
+            2 => 'hai',
+            3 => 'ba',
+            4 => 'bốn',
+            5 => 'năm',
+            6 => 'sáu',
+            7 => 'bảy',
+            8 => 'tám',
+            9 => 'chín',
         ];
         $floor = (int) $diem;
         $decDigit = (int) round(($diem - $floor) * 10);
