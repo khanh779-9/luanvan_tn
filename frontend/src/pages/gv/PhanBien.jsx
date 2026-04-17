@@ -1,7 +1,5 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDeTais, chamDiemPB } from '../../services/deTaiService';
-import Modal from '../../components/common/Modal';
+
+import { useAuth } from '../../context/AuthContext';
 
 export default function GVPBPhanBienPage() {
   const queryClient = useQueryClient();
@@ -26,17 +24,9 @@ export default function GVPBPhanBienPage() {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [search, setSearch] = useState('');
 
-  // Lấy mã GV hiện tại từ localStorage
-  const getCurrentMaGV = () => {
-    try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      return user ? user.id : '';
-    } catch {
-      return '';
-    }
-  };
-  // Lấy danh sách đề tài mà GV này làm GVPB
-  const maGV_PB = getCurrentMaGV();
+  // Lấy mã GV hiện tại từ context
+  const { user } = useAuth() || {};
+  const maGV_PB = user?.id || '';
 
   const { data: deTaiData, isLoading } = useQuery({
     queryKey: ['deTais', { maGV_PB, q: search }],

@@ -1,40 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import {
-  HiOutlineAcademicCap,
-  HiOutlineUsers,
-  HiOutlineDocumentText,
-  HiOutlineClipboardDocumentCheck,
-  HiOutlineCheckCircle,
-  HiOutlineClock,
-  HiOutlineArrowTrendingUp,
-  HiOutlineExclamationTriangle,
-} from 'react-icons/hi2';
-import { Bar, Doughnut } from 'react-chartjs-2';
-import { getOverallStats } from '../../services/dashboardService';
-import api from '../../services/api';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+import { useAuth } from '../../context/AuthContext';
 
 export default function TongQuan() {
   const navigate = useNavigate();
-
-  const user = (() => {
-    try {
-      const s = localStorage.getItem('user');
-      return s ? JSON.parse(s) : null;
-    } catch { return null; }
-  })();
+  const { user } = useAuth() || {};
 
   const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['dashboard-stats'],

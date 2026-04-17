@@ -21,13 +21,11 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const saved = localStorage.getItem("user");
-    if (token && saved) {
-      const userData = JSON.parse(saved);
-      navigate(getDefaultRoute(userData));
+    // Nếu đã có user trong context thì redirect luôn
+    if (contextUser) {
+      navigate(getDefaultRoute(contextUser));
     }
-  }, []);
+  }, [contextUser, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

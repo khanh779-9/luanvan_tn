@@ -3,16 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import api from "../../services/api";
 import { HiOutlineClock } from "react-icons/hi2";
 
+
+import { useAuth } from '../../context/AuthContext';
+
 export default function DashboardSV() {
-  // Lấy thông tin sinh viên từ localStorage
-  const sv = (() => {
-    try {
-      const s = localStorage.getItem("user");
-      return s ? JSON.parse(s) : null;
-    } catch {
-      return null;
-    }
-  })();
+  // Lấy thông tin sinh viên từ context
+  const { user: sv } = useAuth() || {};
 
   // Lấy thống kê tổng quan sinh viên
   const { data: stats, isLoading: statsLoading } = useQuery({

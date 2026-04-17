@@ -24,7 +24,32 @@ class TopicRegistrationFormController extends Controller
             ->orWhere('student2_id', $mssv)
             ->orderByDesc('registered_at')
             ->first();
-        return response()->json(['data' => $topic]);
+
+        // Lấy kết quả đề tài nếu sinh viên đã có maDeTai
+        $ketQua = null;
+        if ($user->maDeTai ?? null) {
+            $deTai = \App\Models\DeTai::find($user->maDeTai);
+            if ($deTai) {
+                $ketQua = [
+                    'tenDeTai' => $deTai->tenDeTai,
+                    'trangThai' => $deTai->trangThai,
+                    'diemGiuaKy' => $deTai->diemGiuaKy,
+                    'nhanXetGiuaKy' => $deTai->nhanXetGiuaKy,
+                    'diemHuongDan' => $deTai->diemHuongDan,
+                    'nhanXetHuongDan' => $deTai->nhanXetHuongDan,
+                    'diemPhanBien' => $deTai->diemPhanBien,
+                    'nhanXetPhanBien' => $deTai->nhanXetPhanBien,
+                    'diemHoiDong' => $deTai->diemHoiDong,
+                    'diemTongKet' => $deTai->diemTongKet,
+                    'diemChu' => $deTai->diemChu,
+                ];
+            }
+        }
+
+        return response()->json([
+            'data' => $topic,
+            'ketQua' => $ketQua,
+        ]);
     }
 
      

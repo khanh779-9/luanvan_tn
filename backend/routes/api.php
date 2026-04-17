@@ -13,9 +13,11 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/login-sv', [AuthController::class, 'loginSinhVien']);
 
 
-// API lấy/cập nhật thời gian tuỳ chỉnh (không cần đăng nhập)
+// API lấy thời gian tuỳ chỉnh (public)
 Route::get('/cauhinh/thoi-gian-tuy-chinh', [\App\Http\Controllers\CauHinhController::class, 'getThoiGianTuyChinh']);
-Route::post('/cauhinh/thoi-gian-tuy-chinh', [\App\Http\Controllers\CauHinhController::class, 'setThoiGianTuyChinh']);
+
+// API cập nhật thời gian tuỳ chỉnh (chỉ admin)
+Route::middleware(['auth:sanctum', 'role.thuky'])->post('/cauhinh/thoi-gian-tuy-chinh', [\App\Http\Controllers\CauHinhController::class, 'setThoiGianTuyChinh']);
 
 // API Giai đoạn (Public)   
 Route::get('/giai-doan', [\App\Http\Controllers\GiaiDoanController::class, 'index']);

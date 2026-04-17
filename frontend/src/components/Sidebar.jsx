@@ -20,16 +20,10 @@ export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const { user: contextUser, clearAuth } = useAuth();
 
-  // Lấy user từ context hoặc localStorage
-  let user = contextUser;
-  if (!user) {
-    try {
-      const userStr = localStorage.getItem("user");
-      if (userStr) user = JSON.parse(userStr);
-    } catch {}
-  }
-  let role = user?.role?.toLowerCase();
 
+  // Lấy user chỉ từ context
+  const user = contextUser;
+  let role = user?.role?.toLowerCase();
   if (role === "sinhvien") role = "sv";
   else if (role && role !== "thuky") role = "gv";
 

@@ -16,8 +16,7 @@ export default function LoginSV({ onLogin }) {
     try {
       const res = await loginSinhVien({ mssv, password });
       if (onLogin) onLogin(res);
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("user", JSON.stringify(res.user));
+      // Nếu dùng AuthContext thì gọi saveAuth ở component cha hoặc truyền prop
       navigate("/sv/dashboard");
     } catch (err) {
       setError(err?.response?.data?.message || "Đăng nhập thất bại");

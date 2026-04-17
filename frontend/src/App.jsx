@@ -24,18 +24,10 @@ import KetQuaDeTaiSV from './pages/sv/KetQuaDeTai';
 const queryClient = new QueryClient();
 
 
+
 function App() {
-  // Lấy user từ context hoặc localStorage
-  const { user: contextUser } = useAuth() || {};
-  let user = contextUser;
-  if (!user) {
-    const saved = localStorage.getItem('user');
-    if (saved) {
-      try {
-        user = JSON.parse(saved);
-      } catch {}
-    }
-  }
+  // Lấy user chỉ từ context
+  const { user } = useAuth() || {};
 
   return (
     <QueryClientProvider client={queryClient}>

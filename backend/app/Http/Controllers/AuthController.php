@@ -80,9 +80,22 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        // Nếu là sinh viên
+        if ($user instanceof \App\Models\SinhVien) {
+            return response()->json([
+                'id' => $user->mssv,
+                'name' => $user->hoTen,
+                'email' => $user->email,
+                'class' => $user->lop,
+                'type' => 'sinhvien',
+                'role' => 'sinhvien',
+            ]);
+        }
+
+        // Nếu là giảng viên
         $role = null;
-        if ($user->isAdmin) {
-            $role = 'ThuKy';
+        if ($user->isAdmin ?? false) {
+            $role = 'thuky';
         } else {
             $tvhd = ThanhVienHoiDong::where('maGV', $user->maGV)->first();
             if ($tvhd) {
@@ -91,6 +104,8 @@ class AuthController extends Controller
                 $role = 'gvhd';
             } elseif (DeTai::where('maGV_PB', $user->maGV)->exists()) {
                 $role = 'gvpb';
+            } else {
+                $role = 'gv';
             }
         }
 

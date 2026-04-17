@@ -1,4 +1,5 @@
 import { createContext, useState, useContext } from 'react';
+import { setAuthToken } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -12,6 +13,7 @@ export function AuthProvider({ children }) {
   const saveAuth = (userData, tokenStr) => {
     setUser(userData);
     setToken(tokenStr);
+    setAuthToken(tokenStr);
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', tokenStr);
   };
@@ -19,6 +21,7 @@ export function AuthProvider({ children }) {
   const clearAuth = () => {
     setUser(null);
     setToken(null);
+    setAuthToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
   };
