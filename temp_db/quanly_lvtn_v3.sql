@@ -60,7 +60,7 @@ VALUES ('Hội đồng 1','C.703');
 -- =========================
 CREATE TABLE detai (
   `maDeTai` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  `tenDeTai` VARCHAR(255) NOT NULL,
+  `tenDeTai` VARCHAR(255) NULL,
   `moTa` TEXT,
   `maGV_HD` VARCHAR(20),
   `maGV_PB` VARCHAR(20),
