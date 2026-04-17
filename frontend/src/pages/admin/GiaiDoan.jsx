@@ -133,10 +133,10 @@ export default function AdminGiaiDoanPage() {
   };
 
 const handleCustomTimeChange = async (checked, date) => {
-  let tgTuyChinh = { date: 1, month: 1, year: 2000 }; // Giá trị mặc định hợp lệ
+  let tgTuyChinh = { day: 1, month: 1, year: 2000 }; // Giá trị mặc định hợp lệ
   if (checked && date) {
     const [year, month, day] = date.split("-");
-    tgTuyChinh = { date: Number(day), month: Number(month), year: Number(year) };
+    tgTuyChinh = { day: Number(day), month: Number(month), year: Number(year) };
   }
   await setThoiGianTuyChinh({
     thoiGianTuyChinh: checked,

@@ -33,7 +33,7 @@ class GiaiDoan extends Model
                     'ngay_bat_dau' => $gd->ngay_bat_dau,
                     'ngay_ket_thuc' => $gd->ngay_ket_thuc
                 ];
-                $currentIndex = $index + 1;
+                $currentIndex = $index ;
                 break;
             }
         }

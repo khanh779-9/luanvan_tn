@@ -20,7 +20,7 @@ class CauHinh extends Model
         $today = date('Y-m-d');
         $useCustomDate = self::where('key', 'thoiGianTuyChinh')->first();
 
-        if ($useCustomDate && $useCustomDate->value === 'true') {
+        if ($useCustomDate && ($useCustomDate->value === 'true'|| $useCustomDate->value === true)) {
             $dateCustomObj = self::where('key', 'tg_TuyChinh')->first();
             if ($dateCustomObj) {
                 // Parse date config
