@@ -26,7 +26,7 @@ class CauHinh extends Model
                 // Parse date config
                 $dateCustomJson = json_decode($dateCustomObj->value);
                 // Format thành Y-m-d (Đảm bảo date và month có 2 chữ số)
-                $day = str_pad($dateCustomJson->date ?? $dateCustomJson->day, 2, '0', STR_PAD_LEFT);
+                $day = str_pad($dateCustomJson->day, 2, '0', STR_PAD_LEFT);
                 $month = str_pad($dateCustomJson->month, 2, '0', STR_PAD_LEFT);
                 $year = $dateCustomJson->year;
                 
