@@ -19,7 +19,7 @@ export default function MainLayout({ role }) {
         />
       )}
 
-      <main className="flex-1 min-h-screen bg-slate-50">
+      <main className="flex-1 h-screen overflow-y-auto bg-slate-50">
         {/* Mobile top bar */}
         <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-slate-200 sticky top-0 z-20">
           <button

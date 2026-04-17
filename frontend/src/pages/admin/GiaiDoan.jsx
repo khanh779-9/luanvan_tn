@@ -79,7 +79,20 @@ export default function AdminGiaiDoanPage() {
     setEditItem(gd);
     setFormMoTa(gd.mo_ta || "");
     setFormLoai(gd.loai || "");
-    setFormData(JSON.parse(gd.data || "[]"));
+    // setFormData(JSON.parse(gd.data || "{}"));
+    // let parsedData = {};
+    // if (typeof gd.data === "string") {
+    //   try {
+    //     parsedData = JSON.parse(gd.data || "{}");
+    //   } catch (e) {
+    //     parsedData = {};
+    //   }
+    // } else {
+    //   parsedData = gd.data || {};
+    // }
+    // setFormData(parsedData);
+
+    setFormData(gd.data || {});
     setFormNgayBatDau(gd.ngay_bat_dau || "");
     setFormNgayKetThuc(gd.ngay_ket_thuc || "");
     setFormError("");
@@ -191,7 +204,8 @@ export default function AdminGiaiDoanPage() {
                 checked={useCustom}
                 onChange={(e) => setUseCustom(e.target.checked)}
               />
-              Dùng thời gian hiện tại tuỳ chỉnh (tắt: dùng thời gian thực tế của hệ thống)
+              Dùng thời gian hiện tại tuỳ chỉnh (tắt: dùng thời gian thực tế của
+              hệ thống)
             </label>
           </>
         )}
@@ -360,15 +374,37 @@ export default function AdminGiaiDoanPage() {
               </div> */}
 
               <div className="gap-4">
-                <p className="block text-sm font-medium text-slate-700 mb-1">Chức năng cho phép:</p>
+                <p className="block text-sm font-medium text-slate-700 mb-1">
+                  Chức năng cho phép:
+                </p>
                 <label className="flex block text-sm font-medium text-slate-700">
                   <input
                     type="checkbox"
                     className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                    checked={formData.con_phancong}
-                    onChange={(e) => setFormData({ ...formData, con_phancong: e.target.checked })}
+                    checked={formData.con_phancong_hd}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        con_phancong_hd: e.target.checked,
+                      })
+                    }
                   />
-                  Còn phân công
+                  Còn phân công gvhd
+                </label>
+
+                <label className="flex block text-sm font-medium text-slate-700">
+                  <input
+                    type="checkbox"
+                    className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                    checked={formData.con_phancong_pb}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        con_phancong_pb: e.target.checked,
+                      })
+                    }
+                  />
+                  Còn phân công gvpb
                 </label>
 
                 <label className="flex block text-sm font-medium text-slate-700">
@@ -376,7 +412,9 @@ export default function AdminGiaiDoanPage() {
                     type="checkbox"
                     className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
                     checked={formData.con_dangky}
-                    onChange={(e) => setFormData({ ...formData, con_dangky: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, con_dangky: e.target.checked })
+                    }
                   />
                   Còn đăng ký
                 </label>
@@ -386,7 +424,9 @@ export default function AdminGiaiDoanPage() {
                     type="checkbox"
                     className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
                     checked={formData.con_chamGK}
-                    onChange={(e) => setFormData({ ...formData, con_chamGK: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, con_chamGK: e.target.checked })
+                    }
                   />
                   Còn chấm điểm giữa kỳ
                 </label>
@@ -396,7 +436,9 @@ export default function AdminGiaiDoanPage() {
                     type="checkbox"
                     className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
                     checked={formData.con_chamPB}
-                    onChange={(e) => setFormData({ ...formData, con_chamPB: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, con_chamPB: e.target.checked })
+                    }
                   />
                   Còn chấm điểm phản biện
                 </label>
@@ -406,7 +448,9 @@ export default function AdminGiaiDoanPage() {
                     type="checkbox"
                     className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
                     checked={formData.con_chamHD}
-                    onChange={(e) => setFormData({ ...formData, con_chamHD: e.target.checked })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, con_chamHD: e.target.checked })
+                    }
                   />
                   Còn chấm điểm hội đồng
                 </label>

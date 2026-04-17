@@ -16,7 +16,10 @@ class GiaiDoanController extends Controller
     public function index()
     {
         $giaiDoans = GiaiDoan::all();
-        return response()->json($giaiDoans);
+        foreach ($giaiDoans as $giaiDoan) {
+            $giaiDoan->data = json_decode($giaiDoan->data);
+        }
+        return response()->json($giaiDoans, 200, [], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
     }
 
     // Cập nhật giai đoạn
@@ -52,16 +55,19 @@ class GiaiDoanController extends Controller
             $dateCustom = Carbon::create(
                 $dateCustomJson->year,
                 $dateCustomJson->month,
-                $dateCustomJson->day
+                $dateCustomJson->date ?? $dateCustomJson->day
             );
             $today = $dateCustom;
         }
 
-        // $this->info("Ngày hôm nay (current): " . $today);
-        
         $giaiDoan = GiaiDoan::where('ngay_bat_dau', '<=', $today)
             ->where('ngay_ket_thuc', '>=', $today)
             ->first();
-        return response()->json($giaiDoan);
+        // $giaiDoan->data= json_decode($giaiDoan->data);        
+        if ($giaiDoan) {
+            $giaiDoan->data = is_string($giaiDoan->data) ? json_decode($giaiDoan->data) : $giaiDoan->data;
+            return response()->json($giaiDoan, 200, [], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        }
+        return response()->json((object) []);
     }
 }

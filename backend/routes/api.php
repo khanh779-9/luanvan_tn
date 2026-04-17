@@ -17,6 +17,10 @@ Route::post('/login-sv', [AuthController::class, 'loginSinhVien']);
 Route::get('/cauhinh/thoi-gian-tuy-chinh', [\App\Http\Controllers\CauHinhController::class, 'getThoiGianTuyChinh']);
 Route::post('/cauhinh/thoi-gian-tuy-chinh', [\App\Http\Controllers\CauHinhController::class, 'setThoiGianTuyChinh']);
 
+// API Giai đoạn (Public)   
+Route::get('/giai-doan', [\App\Http\Controllers\GiaiDoanController::class, 'index']);
+Route::get('/giai-doan/current', [\App\Http\Controllers\GiaiDoanController::class, 'current']);
+
 Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/me', [AuthController::class, 'me']);
@@ -42,9 +46,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/topic-registration-form/{id}/approve', [TopicRegistrationFormController::class, 'approve']);
     Route::post('/nhap-lieu-import-excel', [TopicRegistrationFormController::class, 'importExcel']);
 
-    // Lấy danh sách, giai đoạn hiện tại và cập nhật giai đoạn
-    Route::get('/giai-doan', [\App\Http\Controllers\GiaiDoanController::class, 'index']);
-    Route::get('/giai-doan/current', [\App\Http\Controllers\GiaiDoanController::class, 'current']);
+    // Cập nhật giai đoạn (yêu cầu đăng nhập)
     Route::put('/giai-doan/{id}', [\App\Http\Controllers\GiaiDoanController::class, 'update']);
 
     // API Phân công (lấy danh sách theo Đề tài)
