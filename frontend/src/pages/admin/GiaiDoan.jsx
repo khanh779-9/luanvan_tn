@@ -41,7 +41,7 @@ export default function AdminGiaiDoanPage() {
         const d = data.tg_TuyChinh;
         // Chuyển object {date, month, year} thành yyyy-mm-dd
         const mm = String(d.month).padStart(2, "0");
-        const dd = String(d.date).padStart(2, "0");
+        const dd = String(d.day).padStart(2, "0");
         setCustomDate(`${d.year}-${mm}-${dd}`);
       } else {
         setCustomDate("");
@@ -439,6 +439,18 @@ const handleCustomTimeChange = async (checked, date) => {
                 Còn chấm điểm giữa kỳ
               </label>
 
+                 <label className="flex block text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
+                  checked={formData.con_chamHD}
+                  onChange={(e) =>
+                    setFormData({ ...formData, con_chamHD: e.target.checked })
+                  }
+                />
+                Còn chấm điểm hướng dẫn
+              </label>
+
               <label className="flex block text-sm font-medium text-slate-700">
                 <input
                   type="checkbox"
@@ -455,9 +467,9 @@ const handleCustomTimeChange = async (checked, date) => {
                 <input
                   type="checkbox"
                   className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500 mr-2"
-                  checked={formData.con_chamHD}
+                  checked={formData.con_chamHDG}
                   onChange={(e) =>
-                    setFormData({ ...formData, con_chamHD: e.target.checked })
+                    setFormData({ ...formData, con_chamHDG: e.target.checked })
                   }
                 />
                 Còn chấm điểm hội đồng

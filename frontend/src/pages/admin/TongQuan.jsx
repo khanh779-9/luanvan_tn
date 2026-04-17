@@ -59,7 +59,7 @@ export default function TongQuan() {
     { label: 'Tổng đề tài', value: sodetai, icon: HiOutlineDocumentText, color: 'blue', path: '/admin/nhaplieu' },
     { label: 'Tổng sinh viên', value: sosinhvien, icon: HiOutlineUsers, color: 'cyan', path: '/admin/sinhvien' },
     { label: 'Đề tài hoàn thành', value: detaiDaxong, icon: HiOutlineCheckCircle, color: 'green', path: null },
-    { label: 'Giai đoạn hiện tại', value: currentStage ? `${currentStage}/${totalStages}` : 'Không có', icon: HiOutlineClock, color: 'amber', path: '/admin/giaidoan', isText: true },
+    { label: 'Giai đoạn hiện tại', value: currentStage ? `${currentStage.index}/${totalStages}` : 'Không có', icon: HiOutlineClock, color: 'amber', path: '/admin/giaidoan', isText: true },
   ];
 
   const colorMap = {
@@ -201,8 +201,8 @@ export default function TongQuan() {
             </h3>
             {currentStage ? (
               <div>
-                <p className="text-sm font-medium text-slate-800">{currentStage.mo_ta}</p>
-                <p className="text-xs text-slate-400 mt-1">{currentStage.ngay_bat_dau} → {currentStage.ngay_ket_thuc}</p>
+                <p className="text-sm font-medium text-slate-800">{currentStage.object.mo_ta}</p>
+                <p className="text-xs text-slate-400 mt-1">{currentStage.object.ngay_bat_dau} → {currentStage.object.ngay_ket_thuc}</p>
                 <span className="inline-block mt-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">Đang diễn ra</span>
               </div>
             ) : (

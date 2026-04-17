@@ -24,7 +24,7 @@ class CauHinhController extends Controller
         $validated = $request->validate([
             'thoiGianTuyChinh' => 'required|boolean',
             'tg_TuyChinh' => 'required|array',
-            'tg_TuyChinh.date' => 'required|integer|min:1|max:31',
+            'tg_TuyChinh.day' => 'required|integer|min:1|max:31',
             'tg_TuyChinh.month' => 'required|integer|min:1|max:12',
             'tg_TuyChinh.year' => 'required|integer|min:2000',
         ]);

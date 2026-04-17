@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class GiaiDoan extends Model
 {
@@ -10,7 +11,11 @@ class GiaiDoan extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'mo_ta', 'loai', 'ngay_bat_dau', 'ngay_ket_thuc', 'data',
+        'mo_ta',
+        'loai',
+        'ngay_bat_dau',
+        'ngay_ket_thuc',
+        'data',
     ];
 
     /**
@@ -21,31 +26,25 @@ class GiaiDoan extends Model
     {
         $today = \App\Models\CauHinh::getSimulatedDate();
         $giai_doans = self::orderBy('ngay_bat_dau', 'asc')->get();
-        
-        $currentStageObj = null;
-        $currentIndex = null;
-
-        foreach ($giai_doans as $index => $gd) {
-            // Chỉ cần ngày kết thúc còn trong tương lai/hiện tại
-            if ($gd->ngay_ket_thuc >= $today) {
-                $currentStageObj = [
-                    'mo_ta' => $gd->mo_ta,
-                    'ngay_bat_dau' => $gd->ngay_bat_dau,
-                    'ngay_ket_thuc' => $gd->ngay_ket_thuc
-                ];
-                $currentIndex = $index ;
-                break;
-            }
+        $useDateCustom = CauHinh::where('key', 'thoiGianTuyChinh')->first();
+        if ($useDateCustom && ($useDateCustom->value === true || $useDateCustom->value === 'true')) {
+            $dateCustomJson = CauHinh::where('key', 'tg_TuyChinh')->first();
+            $dateCustomJson = json_decode($dateCustomJson->value);
+            $dateCustom = Carbon::create(
+                $dateCustomJson->year,
+                $dateCustomJson->month,
+                $dateCustomJson->day
+            );
+            $today = $dateCustom;
         }
 
-        // Nếu tất cả các stage đều đã expired, thiết lập chỉ mục thành stage cuối cùng
-        if (is_null($currentIndex) && $giai_doans->isNotEmpty()) {
-            $currentIndex = $giai_doans->count();
-        }
+        $currentStageObj = GiaiDoan::where('ngay_bat_dau', '<=', $today)
+            ->where('ngay_ket_thuc', '>=', $today)
+            ->first();
 
         return [
             'stage_object' => $currentStageObj,
-            'stage_index' => $currentIndex,
+            'stage_index' => $currentStageObj ? $currentStageObj->id : null,
             'total_stages' => $giai_doans->count()
         ];
     }

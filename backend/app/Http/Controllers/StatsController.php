@@ -22,7 +22,10 @@ class StatsController extends Controller
         $stageInfo = GiaiDoan::getDashboardCurrentStage();
 
         return response()->json([
-            'giaidoan_hientai' => $stageInfo['stage_index'],
+            'giaidoan_hientai' => [
+                'index' => $stageInfo['stage_index'],
+                'object' => $stageInfo['stage_object']
+            ],
             'sodetai' => $sodetai,
             'sosinhvien' => $sosinhvien,
             'detai_daxong' => $detai_daxong,

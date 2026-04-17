@@ -52,7 +52,7 @@ class GiaiDoanController extends Controller
             $dateCustom = Carbon::create(
                 $dateCustomJson->year,
                 $dateCustomJson->month,
-                $dateCustomJson->date ?? $dateCustomJson->day
+                $dateCustomJson->day
             );
             $today = $dateCustom;
         }

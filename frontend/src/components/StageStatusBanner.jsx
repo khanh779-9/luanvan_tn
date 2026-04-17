@@ -9,6 +9,7 @@ const statusMessages = {
   con_chamGK: "Chưa đến hoặc đã qua thời hạn chấm điểm GK",
   con_chamPB: "Chưa đến hoặc đã qua thời hạn chấm điểm PB",
   con_chamHD: "Chưa đến hoặc đã qua thời hạn chấm điểm HD",
+  con_chamHDG: "Chưa đến hoặc đã qua thời hạn chấm điểm hội đồng",
 };
 
 function StageStatusBanner({ children }) {
@@ -29,6 +30,7 @@ function StageStatusBanner({ children }) {
           "/gv/giua-ky": ["con_chamGK"],
           "/gv/phanbien": ["con_chamPB"],
           "/gv/huongdan": ["con_chamHD"],
+          "/gv/hoidong": ["con_chamHDG"],
         };
 
         const currentKeys = routeKeyMap[location.pathname];
