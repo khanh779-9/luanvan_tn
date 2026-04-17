@@ -132,27 +132,17 @@ export default function AdminGiaiDoanPage() {
 
   };
 
-   const handleSaveThoiGianTuyChinh = async (date) => {
-      try {
-        await setThoiGianTuyChinh({
-          thoiGianTuyChinh: date,
-        });
-      } catch (error) {
-        console.error("Lỗi khi lưu thời gian tuỳ chỉnh:", error);
-      }
-    };
-
-      const handleSaveUseCustomTime = async (useCustom) => {
-        try {
-          await setThoiGianTuyChinh({
-            thoiGianTuyChinh: useCustom,
-          });
-        } catch (error) {
-          console.error("Lỗi khi lưu tuỳ chọn dùng thời gian tuỳ chỉnh:", error);
-        } 
-      };
-
-
+const handleCustomTimeChange = async (checked, date) => {
+  let tgTuyChinh = { date: 1, month: 1, year: 2000 }; // Giá trị mặc định hợp lệ
+  if (checked && date) {
+    const [year, month, day] = date.split("-");
+    tgTuyChinh = { date: Number(day), month: Number(month), year: Number(year) };
+  }
+  await setThoiGianTuyChinh({
+    thoiGianTuyChinh: checked,
+    tg_TuyChinh: tgTuyChinh,
+  });
+};
 
 
   return (
@@ -228,9 +218,9 @@ export default function AdminGiaiDoanPage() {
                 className="form-checkbox h-4 w-4 accent-blue-600 border-slate-300 rounded focus:ring-blue-500"
                 checked={useCustom}
                 onChange={(e) => {
-                  setUseCustom(e.target.checked);
-                  handleSaveUseCustomTime(e.target.checked);
-                  handleSaveThoiGianTuyChinh(e.target.checked ? customDate : null);
+                  const checked = e.target.checked;
+                  setUseCustom(checked);
+                  handleCustomTimeChange(checked, customDate);
                 }}
               />
               Dùng thời gian hiện tại tuỳ chỉnh (tắt: dùng thời gian thực tế của
