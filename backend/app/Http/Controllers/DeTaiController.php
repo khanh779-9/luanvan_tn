@@ -222,61 +222,62 @@ class DeTaiController extends Controller
         $detai = DeTai::find($id);
         if (!$detai) return response()->json(['message' => 'Not found'], 404);
 
-        $svList = SinhVien::where('maDeTai', $id)->get();
+        $dataGVHD = $detai->data_json['gvhd'] ?? [];
         $gvhd = GiangVien::find($detai->maGV_HD);
-
-        $templateDir = storage_path('app/templates');
-        if (count($svList) >= 2) {
-            $templateFile = $templateDir . '/Mau_01_01.docx';
-        } else {
-            $templateFile = $templateDir . '/Mau_01_02.docx';
+        $templateDir = base_path('/template_docs');
+        $svArr = $dataGVHD['sinh_viens'] ?? [];
+        if (count($svArr) < 1) {
+            // fallback lấy từ bảng sinh viên nếu chưa có trong data_json
+            $svArr = SinhVien::where('maDeTai', $id)->get()->toArray();
         }
-
+        $templateFile = count($svArr) >= 2
+            ? $templateDir . '/template_chamdiem_hd_2sv.docx'
+            : $templateDir . '/template_chamdiem_hd_1sv.docx';
         if (!file_exists($templateFile)) {
             return response()->json(['message' => 'Template không tồn tại, chạy scripts/prepare_templates.php trước'], 500);
         }
-
         Settings::setTempDir(storage_path('app'));
         $tp = new TemplateProcessor($templateFile);
-
-        $tp->setValue('ten_de_tai', $detai->tenDeTai ?? '');
-        $tp->setValue('ten_gvhd', $gvhd ? $gvhd->tenGV : '');
-
-        $tieuChi = $detai->tieu_chi_hd ?? [];
-        for ($i = 1; $i <= 5; $i++) {
-            $tp->setValue('tc' . $i, $tieuChi['tc' . $i] ?? '');
+        // Gán biến chung
+        $tp->setValue('tenDeTai', $detai->tenDeTai ?? '');
+        $tp->setValue('tenGVHD', $gvhd ? $gvhd->tenGV : '');
+        $tp->setValue('ndDieuChinh', $dataGVHD['ndDieuChinh'] ?? '');
+        $tp->setValue('uuDiem', $dataGVHD['uuDiem'] ?? '');
+        $tp->setValue('thieuSot', $dataGVHD['thieuSot'] ?? '');
+        $tp->setValue('cauHoi', $dataGVHD['cauHoi'] ?? '');
+        // Thuyết minh
+        $thuyetMinh = $dataGVHD['thuyetMinh'] ?? '';
+        $tp->setValue('thuyetMinh_Dat', $thuyetMinh === 'Đạt' ? 'x' : '');
+        $tp->setValue('thuyetMinh_KhongDat', $thuyetMinh === 'Không đạt' ? 'x' : '');
+        // Đề nghị
+        $deNghiArr = array_column($svArr, 'deNghi');
+        $tp->setValue('deNghi_Duoc', in_array('Được bảo vệ', $deNghiArr) ? 'x' : '');
+        $tp->setValue('deNghi_Khong', in_array('Không được bảo vệ', $deNghiArr) ? 'x' : '');
+        $tp->setValue('deNghi_BoSung', in_array('Bổ sung', $deNghiArr) ? 'x' : '');
+        // Sinh viên
+        for ($i = 0; $i < 2; $i++) {
+            $sv = $svArr[$i] ?? [];
+            $idx = $i + 1;
+            $tp->setValue('hoTenSV' . $idx, $sv['hoTen'] ?? '');
+            $tp->setValue('mssv' . $idx, $sv['mssv'] ?? '');
+            $tp->setValue('lop' . $idx, $sv['lop'] ?? '');
+            $tp->setValue('diemPhanTich' . $idx, $sv['diemPhanTich'] ?? '');
+            $tp->setValue('diemThietKe' . $idx, $sv['diemThietKe'] ?? '');
+            $tp->setValue('diemHienThuc' . $idx, $sv['diemHienThuc'] ?? '');
+            $tp->setValue('diemBaoCao' . $idx, $sv['diemBaoCao'] ?? '');
+            $tp->setValue('diemTongCong' . $idx, $sv['diemTongCong'] ?? '');
+            $tp->setValue('diemFinal' . $idx, $sv['diemFinal'] ?? '');
         }
-
-        $diem = $detai->diemHuongDan ?? '';
-        $tp->setValue('diem_tong', $diem);
-        $tp->setValue('diem_chu', $diem !== '' ? $this->diemSangChu((float)$diem) : '');
-        $tp->setValue('nhan_xet', $detai->nhanXetHuongDan ?? '');
-
+        // Điểm tối đa các mục (nếu có, hoặc hardcode)
+        $tp->setValue('maxPhanTich', '10');
+        $tp->setValue('maxThietKe', '10');
+        $tp->setValue('maxHienThuc', '10');
+        $tp->setValue('maxBaoCao', '10');
+        // Ngày tháng năm
         $now = now();
         $tp->setValue('ngay', $now->day);
         $tp->setValue('thang', $now->month);
         $tp->setValue('nam', $now->year);
-
-        if (count($svList) >= 2) {
-            $sv1 = $svList->get(0);
-            $sv2 = $svList->get(1);
-            if ($sv1) {
-                $tp->setValue('ho_ten_sv_01', $sv1->hoTen ?? '');
-                $tp->setValue('mssv_01', $sv1->mssv ?? '');
-                $tp->setValue('lop_01', $sv1->lop ?? '');
-            }
-            if ($sv2) {
-                $tp->setValue('ho_ten_sv_02', $sv2->hoTen ?? '');
-                $tp->setValue('mssv_02', $sv2->mssv ?? '');
-                $tp->setValue('lop_02', $sv2->lop ?? '');
-            }
-        } else {
-            $sv = $svList->first();
-            $tp->setValue('ho_ten_sv', $sv ? $sv->hoTen : '');
-            $tp->setValue('mssv', $sv ? $sv->mssv : '');
-            $tp->setValue('lop', $sv ? $sv->lop : '');
-        }
-
         $tempFile = storage_path('app/temp_HD_' . $detai->maDeTai . '_' . time() . '.docx');
         $tp->saveAs($tempFile);
         $filename = 'Phieu_cham_HD_' . $detai->maDeTai . '.docx';
@@ -288,61 +289,61 @@ class DeTaiController extends Controller
         $detai = DeTai::find($id);
         if (!$detai) return response()->json(['message' => 'Not found'], 404);
 
-        $svList = SinhVien::where('maDeTai', $id)->get();
+        $dataGVPB = $detai->data_json['gvpb'] ?? [];
         $gvpb = GiangVien::find($detai->maGV_PB);
-
-        $templateDir = storage_path('app/templates');
-        if (count($svList) >= 2) {
-            $templateFile = $templateDir . '/Mau_02_01.docx';
-        } else {
-            $templateFile = $templateDir . '/Mau_02_02.docx';
+        $templateDir = base_path('/template_docs');
+        $svArr = $dataGVPB['sinh_viens'] ?? [];
+        if (count($svArr) < 1) {
+            $svArr = SinhVien::where('maDeTai', $id)->get()->toArray();
         }
-
+        $templateFile = count($svArr) >= 2
+            ? $templateDir . '/template_chamdiem_pb_2sv.docx'
+            : $templateDir . '/template_chamdiem_pb_1sv.docx';
         if (!file_exists($templateFile)) {
             return response()->json(['message' => 'Template không tồn tại, chạy scripts/prepare_templates.php trước'], 500);
         }
-
         Settings::setTempDir(storage_path('app'));
         $tp = new TemplateProcessor($templateFile);
-
-        $tp->setValue('ten_de_tai', $detai->tenDeTai ?? '');
-        $tp->setValue('ten_gvpb', $gvpb ? $gvpb->tenGV : '');
-
-        $tieuChi = $detai->tieu_chi_pb ?? [];
-        for ($i = 1; $i <= 5; $i++) {
-            $tp->setValue('tc' . $i, $tieuChi['tc' . $i] ?? '');
+        // Gán biến chung
+        $tp->setValue('tenDeTai', $detai->tenDeTai ?? '');
+        $tp->setValue('tenGVPB', $gvpb ? $gvpb->tenGV : '');
+        $tp->setValue('ndDieuChinh', $dataGVPB['ndDieuChinh'] ?? '');
+        $tp->setValue('uuDiem', $dataGVPB['uuDiem'] ?? '');
+        $tp->setValue('thieuSot', $dataGVPB['thieuSot'] ?? '');
+        $tp->setValue('cauHoi', $dataGVPB['cauHoi'] ?? '');
+        // Thuyết minh
+        $thuyetMinh = $dataGVPB['thuyetMinh'] ?? '';
+        $tp->setValue('thuyetMinh_Dat', $thuyetMinh === 'Đạt' ? 'x' : '');
+        $tp->setValue('thuyetMinh_KhongDat', $thuyetMinh === 'Không đạt' ? 'x' : '');
+        // Đề nghị
+        $deNghiArr = array_column($svArr, 'deNghi');
+        $tp->setValue('deNghi_Duoc', in_array('Được bảo vệ', $deNghiArr) ? 'x' : '');
+        $tp->setValue('deNghi_Khong', in_array('Không được bảo vệ', $deNghiArr) ? 'x' : '');
+        $tp->setValue('deNghi_BoSung', in_array('Bổ sung', $deNghiArr) ? 'x' : '');
+        // Sinh viên
+        for ($i = 0; $i < 2; $i++) {
+            $sv = $svArr[$i] ?? [];
+            $idx = $i + 1;
+            $tp->setValue('hoTenSV' . $idx, $sv['hoTen'] ?? '');
+            $tp->setValue('mssv' . $idx, $sv['mssv'] ?? '');
+            $tp->setValue('lop' . $idx, $sv['lop'] ?? '');
+            $tp->setValue('diemPhanTich' . $idx, $sv['diemPhanTich'] ?? '');
+            $tp->setValue('diemThietKe' . $idx, $sv['diemThietKe'] ?? '');
+            $tp->setValue('diemHienThuc' . $idx, $sv['diemHienThuc'] ?? '');
+            $tp->setValue('diemBaoCao' . $idx, $sv['diemBaoCao'] ?? '');
+            $tp->setValue('diemTongCong' . $idx, $sv['diemTongCong'] ?? '');
+            $tp->setValue('diemFinal' . $idx, $sv['diemFinal'] ?? '');
         }
-
-        $diem = $detai->diemPhanBien ?? '';
-        $tp->setValue('diem_tong', $diem);
-        $tp->setValue('diem_chu', $diem !== '' ? $this->diemSangChu((float)$diem) : '');
-        $tp->setValue('nhan_xet', $detai->nhanXetPhanBien ?? '');
-
+        // Điểm tối đa các mục (nếu có, hoặc hardcode)
+        $tp->setValue('maxPhanTich', '10');
+        $tp->setValue('maxThietKe', '10');
+        $tp->setValue('maxHienThuc', '10');
+        $tp->setValue('maxBaoCao', '10');
+        // Ngày tháng năm
         $now = now();
         $tp->setValue('ngay', $now->day);
         $tp->setValue('thang', $now->month);
         $tp->setValue('nam', $now->year);
-
-        if (count($svList) >= 2) {
-            $sv1 = $svList->get(0);
-            $sv2 = $svList->get(1);
-            if ($sv1) {
-                $tp->setValue('ho_ten_sv_01', $sv1->hoTen ?? '');
-                $tp->setValue('mssv_01', $sv1->mssv ?? '');
-                $tp->setValue('lop_01', $sv1->lop ?? '');
-            }
-            if ($sv2) {
-                $tp->setValue('ho_ten_sv_02', $sv2->hoTen ?? '');
-                $tp->setValue('mssv_02', $sv2->mssv ?? '');
-                $tp->setValue('lop_02', $sv2->lop ?? '');
-            }
-        } else {
-            $sv = $svList->first();
-            $tp->setValue('ho_ten_sv', $sv ? $sv->hoTen : '');
-            $tp->setValue('mssv', $sv ? $sv->mssv : '');
-            $tp->setValue('lop', $sv ? $sv->lop : '');
-        }
-
         $tempFile = storage_path('app/temp_PB_' . $detai->maDeTai . '_' . time() . '.docx');
         $tp->saveAs($tempFile);
         $filename = 'Phieu_cham_PB_' . $detai->maDeTai . '.docx';
