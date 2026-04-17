@@ -12,7 +12,7 @@ function getDefaultRoute(user) {
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { saveAuth } = useAuth();
+  const { saveAuth, user: contextUser } = useAuth();
 
   const [maGV, setMaGV] = useState("");
   const [password, setPassword] = useState("");

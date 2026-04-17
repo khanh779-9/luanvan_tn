@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 import { setAuthToken } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -9,6 +9,11 @@ export function AuthProvider({ children }) {
     return saved ? JSON.parse(saved) : null;
   });
   const [token, setToken] = useState(() => localStorage.getItem('token'));
+
+  // Đồng bộ lại token vào axios interceptor khi mount (fix mất token khi reload)
+  useEffect(() => {
+    if (token) setAuthToken(token);
+  }, [token]);
 
   const saveAuth = (userData, tokenStr) => {
     setUser(userData);

@@ -1,4 +1,32 @@
+import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import {
+  HiOutlineAcademicCap,
+  HiOutlineUsers,
+  HiOutlineDocumentText,
+  HiOutlineClipboardDocumentCheck,
+  HiOutlineCheckCircle,
+  HiOutlineClock,
+  HiOutlineArrowTrendingUp,
+  HiOutlineExclamationTriangle,
+} from 'react-icons/hi2';
 
+import { Doughnut,Bar } from 'react-chartjs-2';
+
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
+
+import { getOverallStats } from '../../services/dashboardService';
+import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
 export default function TongQuan() {

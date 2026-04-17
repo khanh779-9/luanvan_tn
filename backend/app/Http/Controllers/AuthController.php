@@ -92,7 +92,7 @@ class AuthController extends Controller
             ]);
         }
 
-        // Nếu là giảng viên
+
         $role = null;
         if ($user->isAdmin ?? false) {
             $role = 'thuky';
