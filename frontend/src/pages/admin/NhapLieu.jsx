@@ -23,6 +23,9 @@ export default function AdminNhapLieuPage() {
   const [deleteItem, setDeleteItem] = useState(null);
   const [showImportModal, setShowImportModal] = useState(false);
 
+  // THÊM: Các state và hàm xử lý Checkbox bị thiếu
+  const [selectedIds, setSelectedIds] = useState([]);
+
   const { data: listData, isLoading } = useQuery({
     queryKey: ['nhaplieu', { search, status: statusFilter, page }],
     queryFn: () => getList({ search: search || undefined, status: statusFilter || undefined, page }).then(r => r.data),
@@ -43,6 +46,19 @@ export default function AdminNhapLieuPage() {
       queryClient.invalidateQueries({ queryKey: ['nhaplieu'] });
     },
   });
+
+  // THÊM: Xử lý logic chọn Checkbox
+  const handleSelectAll = (e) => {
+    if (e.target.checked && Array.isArray(listData?.data)) {
+        setSelectedIds(listData.data.map(item => item.id));
+    } else {
+        setSelectedIds([]);
+    }
+  };
+
+  const handleSelectItem = (id) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+  };
 
   const tableData = listData?.data || [];
   const total = listData?.total || 0;
@@ -86,99 +102,97 @@ export default function AdminNhapLieuPage() {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="bg-slate-50">
-                <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-12">STT</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Tên đề tài</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Sinh viên</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">GVHD</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Nguồn</th>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3"></th>
+          <table className="w-full border-collapse">
+            <thead className="bg-slate-50 text-slate-500 uppercase text-[11px] font-bold tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="px-4 py-4 text-left w-10">
+                    <input type="checkbox" className="rounded border-slate-300" onChange={handleSelectAll} checked={selectedIds.length === listData?.data?.length && selectedIds.length > 0} />
+                </th>
+                <th className="px-4 py-4 text-left whitespace-nowrap">Nhóm</th>
+                <th className="px-4 py-4 text-left">Sinh viên 1</th>
+                <th className="px-4 py-4 text-left">Sinh viên 2</th>
+                <th className="px-4 py-4 text-left">Hướng đề tài</th>
+                <th className="px-4 py-4 text-left whitespace-nowrap">Trạng thái</th>
+                <th className="px-4 py-4 text-right whitespace-nowrap">Thao tác</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {isLoading ? (
-                [...Array(5)].map((_, i) => (
-                  <tr key={i}>
-                    {[...Array(7)].map((_, ci) => (
-                      <td key={ci} className="px-4 py-3 border-t border-slate-100">
-                        <div className="bg-slate-100 animate-pulse rounded h-4 w-3/4"></div>
-                      </td>
-                    ))}
+                  <tr><td colSpan={8} className="px-4 py-12 text-center text-slate-500 text-sm">Đang tải dữ liệu...</td></tr>
+              ) : Array.isArray(listData?.data) && listData.data.length > 0 ? (
+                listData.data.map((row) => (
+                  <tr key={row.id} className={`hover:bg-slate-50/50 transition-colors ${selectedIds.includes(row.id) ? 'bg-blue-50/30' : ''}`}>
+                    <td className="px-4 py-4">
+                      <input type="checkbox" className="rounded border-slate-300" checked={selectedIds.includes(row.id)} onChange={() => handleSelectItem(row.id)} />
+                    </td>
+                    
+                    <td className="px-4 py-4">
+                        <span className='text-sm font-medium'>
+                            {row.topic_type === 'hai_sinh_vien' ? '2 Người' : '1 Người'}
+                        </span>
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <div className="text-sm font-semibold text-slate-900">{row.student1_name}</div>
+                      <div className="text-xs text-slate-900 mt-0.5">{row.student1_id}</div>
+                    </td>
+                    
+                    <td className="px-4 py-4">
+                      {row.student2_id ? (
+                        <>
+                          <div className="text-sm font-semibold text-slate-900">{row.student2_name}</div>
+                          <div className="text-xs text-slate-900 mt-0.5">{row.student2_id} </div>
+                        </>
+                      ) : (
+                        <span className="text-slate-400 text-xs font-medium italic"></span>
+                      )}
+                    </td>
+                    
+                    <td className="px-4 py-4 max-w-[200px]">
+                      <span className="text-sm font-medium">
+                        {row.topic_description || "Chưa xác định"}
+                      </span>
+                    </td>
+                    
+                    
+                    
+                    <td className="px-4 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold border ${STATUS_MAP[row.status]?.cls}`}>
+                        {STATUS_MAP[row.status]?.label}
+                      </span>
+                    </td>
+                    
+                    <td className="px-4 py-4 text-right">
+                      <div className="flex justify-end gap-1">
+                        <button onClick={() => { setEditItem(row); setShowFormModal(true); }} className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors mr-1 font-semibold text-xs">Sửa</button>
+                        <button onClick={() => { setDeleteItem(row); setShowDeleteConfirm(true); }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-semibold text-xs">Xóa</button>
+                      </div>
+                    </td>
                   </tr>
                 ))
-              ) : tableData.length === 0 ? (
+              ) : (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center">
-                    <p className="text-slate-500 font-semibold">Chưa có dữ liệu đăng ký</p>
-                    <p className="text-sm text-slate-400 mt-1">Import file Excel hoặc thêm bản ghi thủ công.</p>
+                  <td colSpan={8} className="px-4 py-12 text-center text-slate-500 text-sm">
+                    Không có dữ liệu
                   </td>
                 </tr>
-              ) : (
-                tableData.map((item, idx) => {
-                  const st = STATUS_MAP[item.status] || { label: item.status, cls: 'bg-slate-100 text-slate-600' };
-                  const students = [
-                    { name: item.student1_name, id: item.student1_id },
-                    ...(item.student2_id ? [{ name: item.student2_name, id: item.student2_id }] : []),
-                  ];
-                  return (
-                    <tr key={item.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 text-sm text-slate-500 border-t border-slate-100 text-center">{start + idx}</td>
-                      <td className="px-4 py-3 text-sm text-slate-700 border-t border-slate-100 font-medium max-w-[250px] truncate" title={item.topic_title}>
-                        {item.topic_title}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-700 border-t border-slate-100">
-                        {students.map((sv, i) => (
-                          <div key={i} className={i > 0 ? 'mt-1' : ''}>
-                            <span className="font-medium">{sv.name}</span>
-                            <span className="text-slate-400"> ({sv.id})</span>
-                          </div>
-                        ))}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-700 border-t border-slate-100 whitespace-nowrap">
-                        {item.gvhd_code || <span className="text-slate-400 italic">Chưa có</span>}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-slate-700 border-t border-slate-100">
-                        <span className="text-xs">{item.source || '—'}</span>
-                      </td>
-                      <td className="px-4 py-3 border-t border-slate-100">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${st.cls}`}>{st.label}</span>
-                      </td>
-                      <td className="px-4 py-3 border-t border-slate-100">
-                        <div className="flex gap-2 items-center">
-                          {item.status === 'cho_duyet' && (
-                            <button
-                              onClick={() => approveMut.mutate(item.id)}
-                              disabled={approveMut.isPending}
-                              className="text-xs text-green-600 hover:text-green-800 font-semibold"
-                            >
-                              Duyệt
-                            </button>
-                          )}
-                          <button onClick={() => { setEditItem(item); setShowFormModal(true); }} className="text-xs text-blue-600 hover:text-blue-800">Sửa</button>
-                          <button onClick={() => { setDeleteItem(item); setShowDeleteConfirm(true); }} className="text-xs text-red-500 hover:text-red-700">Xóa</button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      <Pagination 
-        page={page} 
-        setPage={setPage} 
-        total={total} 
-        perPage={perPage} 
-        itemName="bản ghi" 
-      />
+      <div className="mt-6">
+          <Pagination 
+            page={page} 
+            setPage={setPage} 
+            total={total} 
+            perPage={perPage} 
+            itemName="bản ghi" 
+          />
+      </div>
 
       {showImportModal && <ImportModal onClose={() => setShowImportModal(false)} />}
 
@@ -190,7 +204,7 @@ export default function AdminNhapLieuPage() {
         <ConfirmModal 
           isOpen={true}
           title="Xóa bản đăng ký?"
-          message={`Bạn có chắc muốn xóa bản ghi của ${deleteItem.student1_name}? Hành động này không thể hoàn tác.`}
+          message={`Bạn có chắc muốn xóa bản ghi ${deleteItem.student1_name}-${deleteItem.student1_id}? Hành động này không thể hoàn tác`}
           onConfirm={() => deleteMut.mutate(deleteItem.id)}
           onCancel={() => { setShowDeleteConfirm(false); setDeleteItem(null); }}
           loading={deleteMut.isPending}
@@ -261,7 +275,6 @@ function ImportModal({ onClose }) {
 function FormModal({ editItem, onClose }) {
   const queryClient = useQueryClient();
   const [form, setForm] = useState({
-    topic_title: editItem?.topic_title || '',
     topic_description: editItem?.topic_description || '',
     topic_type: editItem?.topic_type || 'mot_sinh_vien',
     student1_id: editItem?.student1_id || '',
@@ -272,8 +285,6 @@ function FormModal({ editItem, onClose }) {
     student2_name: editItem?.student2_name || '',
     student2_class: editItem?.student2_class || '',
     student2_email: editItem?.student2_email || '',
-    gvhd_code: editItem?.gvhd_code || '',
-    gvpb_code: editItem?.gvpb_code || '',
     note: editItem?.note || '',
     status: editItem?.status || 'cho_duyet',
   });
@@ -310,15 +321,9 @@ function FormModal({ editItem, onClose }) {
   return (
     <Modal isOpen={true} onClose={onClose} title={editItem ? 'Sửa bản đăng ký' : 'Thêm bản đăng ký'} maxWidth="max-w-2xl">
       <form onSubmit={handleSubmit}>
-        {/* Đề tài */}
+        
         <div className="mb-4">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Tên đề tài</label>
-          <input type="text" value={form.topic_title} onChange={e => handleChange('topic_title', e.target.value)} disabled={loading}
-            className={`w-full border rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50 ${errors.topic_title ? 'border-red-300' : 'border-slate-200'}`} />
-          {errors.topic_title && <p className="text-red-500 text-xs mt-1">{errors.topic_title[0]}</p>}
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Mô tả đề tài</label>
+          <label className="block text-sm font-semibold text-slate-700 mb-1">Hướng đề tài</label>
           <textarea rows={2} value={form.topic_description} onChange={e => handleChange('topic_description', e.target.value)} disabled={loading}
             className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
         </div>
@@ -331,7 +336,6 @@ function FormModal({ editItem, onClose }) {
           </select>
         </div>
 
-        {/* SV 1 */}
         <p className="text-sm font-semibold text-slate-600 mb-2 mt-4">Sinh viên 1</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
@@ -356,7 +360,6 @@ function FormModal({ editItem, onClose }) {
           </div>
         </div>
 
-        {/* SV 2 */}
         {isHaiSV && (
           <>
             <p className="text-sm font-semibold text-slate-600 mb-2">Sinh viên 2</p>
@@ -385,24 +388,8 @@ function FormModal({ editItem, onClose }) {
           </>
         )}
 
-        {/* GVHD, GVPB, Note, Status */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Mã GVHD</label>
-            <input type="text" value={form.gvhd_code} onChange={e => handleChange('gvhd_code', e.target.value)} disabled={loading}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">Mã GVPB</label>
-            <input type="text" value={form.gvpb_code} onChange={e => handleChange('gvpb_code', e.target.value)} disabled={loading}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-          </div>
-        </div>
-        <div className="mb-4">
-          <label className="block text-sm font-semibold text-slate-700 mb-1">Ghi chú</label>
-          <textarea rows={2} value={form.note} onChange={e => handleChange('note', e.target.value)} disabled={loading}
-            className="w-full border border-slate-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none disabled:opacity-50" />
-        </div>
+        
+        
         <div className="mb-4">
           <label className="block text-sm font-semibold text-slate-700 mb-1">Trạng thái</label>
           <select value={form.status} onChange={e => handleChange('status', e.target.value)} disabled={loading}
