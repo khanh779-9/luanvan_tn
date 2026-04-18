@@ -198,8 +198,8 @@ export default function TongQuan() {
             </h3>
             {currentStage ? (
               <div>
-                <p className="text-sm font-medium text-slate-800">{currentStage.object.mo_ta}</p>
-                <p className="text-xs text-slate-400 mt-1">{currentStage.object.ngay_bat_dau} → {currentStage.object.ngay_ket_thuc}</p>
+                <p className="text-sm font-medium text-slate-800">{currentStage.object?.mo_ta}</p>
+                <p className="text-xs text-slate-400 mt-1">{currentStage.object?.ngay_bat_dau} → {currentStage.object?.ngay_ket_thuc}</p>
                 <span className="inline-block mt-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-green-50 text-green-700">Đang diễn ra</span>
               </div>
             ) : (
